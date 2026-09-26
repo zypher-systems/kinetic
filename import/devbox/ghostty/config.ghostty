@@ -1,0 +1,11 @@
+# Custom configuration added by setup script  
+command = /usr/bin/fish
+font-family = MesloLGS Nerd Font Mono
+font-family-bold = MesloLGS Nerd Font Mono Bold
+font-family-italic = MesloLGS Nerd Font Mono Italic
+font-size = 12
+background-opacity = 0.9
+theme = carbonfox
+shell-integration = fish
+window-width = 110
+window-height = 40

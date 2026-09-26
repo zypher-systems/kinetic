@@ -1,0 +1,12 @@
+# Build outputs
+/out/
+*.iso
+*.iso.sha256
+*.rpm
+
+# Editors / OS
+*~
+*.swp
+.DS_Store
+.idea/
+.vscode/
