@@ -19,7 +19,17 @@ build_dir="/var/tmp/kinetic-build"
 log="${KINETIC_OUT}/build.log"
 started=${SECONDS}
 
-deps=(kiwi-cli kiwi-systemdeps kiwi-selinux distribution-gpg-keys)
+# Only what an x86_64 live ISO build needs; the kiwi-systemdeps metapackage
+# also pulls apt, pacman, and zypper for building other distributions
+deps=(
+	kiwi-cli
+	kiwi-systemdeps-core
+	kiwi-systemdeps-iso-media
+	kiwi-systemdeps-bootloaders
+	kiwi-systemdeps-filesystems
+	kiwi-selinux
+	distribution-gpg-keys
+)
 missing=()
 for pkg in "${deps[@]}"; do
 	rpm -q "${pkg}" >/dev/null 2>&1 || missing+=("${pkg}")
@@ -33,7 +43,8 @@ fi
 # old image root. Unmount them first, and never let rm cross into a mount.
 if [[ -d "${build_dir}" ]]; then
 	echo "==> Clearing previous build in ${build_dir}"
-	findmnt --list --noheadings --output TARGET | grep "^${build_dir}/" | sort -r | while read -r mnt; do
+	mapfile -t mounts < <(findmnt --list --noheadings --output TARGET | grep "^${build_dir}/" | sort -r || true)
+	for mnt in "${mounts[@]}"; do
 		umount --recursive --lazy "${mnt}" || true
 	done
 	rm -rf --one-file-system "${build_dir}"
