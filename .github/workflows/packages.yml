@@ -1,0 +1,66 @@
+# Build, sign, and publish Kinetic's packages to GitHub Pages whenever they
+# change on main. Installed Kinetic systems update from the published repo.
+name: Packages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - packages/**
+      - branding/**
+      - scripts/build-rpms.sh
+      - scripts/publish-repo.sh
+      - scripts/common.sh
+      - .github/workflows/packages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never run two publishes at once
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: registry.fedoraproject.org/fedora:44
+    steps:
+      - name: Install build tools
+        run: >
+          dnf -y install git tar findutils gnupg2 rpm-build rpm-sign
+          systemd-rpm-macros createrepo_c dnf5-plugins librsvg2-tools ImageMagick
+
+      - uses: actions/checkout@v7
+
+      - name: Build packages
+        run: ./scripts/build-rpms.sh --no-container
+
+      - name: Import the signing key
+        env:
+          RPM_SIGNING_KEY: ${{ secrets.RPM_SIGNING_KEY }}
+        run: |
+          printf '%s\n' "$RPM_SIGNING_KEY" | gpg --batch --quiet --import
+          echo "KINETIC_SIGNING_FPR=$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ {print $10; exit}')" >> "$GITHUB_ENV"
+
+      - name: Sign and assemble the repository
+        run: ./scripts/publish-repo.sh site
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

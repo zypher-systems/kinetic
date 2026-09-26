@@ -4,12 +4,20 @@
 #
 #   ./scripts/build-rpms.sh                   # every package in packages/
 #   ./scripts/build-rpms.sh zypheros-logos    # only the named packages
+#   ./scripts/build-rpms.sh --no-container    # build directly, as root in a
+#                                             # Fedora 44 container (CI)
 set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 image="localhost/kinetic-builder:44"
 work="${KINETIC_OUT}/rpmbuild"
+
+use_container=1
+if [[ "${1:-}" == "--no-container" ]]; then
+	use_container=0
+	shift
+fi
 
 cd "${KINETIC_ROOT}"
 
@@ -20,8 +28,6 @@ else
 fi
 
 command -v createrepo_c >/dev/null || { echo "createrepo_c is required: sudo dnf install createrepo_c" >&2; exit 1; }
-
-podman build --quiet --tag "${image}" containers/builder >/dev/null
 
 # Stage each package: its spec, its own files, and the shared branding sources
 rm -rf "${work}"
@@ -36,8 +42,9 @@ for pkg in "${packages[@]}"; do
 	find branding -type f ! -name README.md -exec cp -p {} "${work}/${pkg}/SOURCES/" \;
 done
 
-podman run --rm --volume "${work}:/work:Z" "${image}" bash -euo pipefail -c '
-	for dir in /work/*/; do
+# Builds every staged package; the staging directory is $1
+build_loop='
+	for dir in "$1"/*/; do
 		pkg=$(basename "${dir}")
 		echo "==> ${pkg}"
 		dnf -y -q builddep "${dir}SPECS/${pkg}.spec" >/dev/null
@@ -47,6 +54,13 @@ podman run --rm --volume "${work}:/work:Z" "${image}" bash -euo pipefail -c '
 			exit 1
 		fi
 	done'
+
+if ((use_container)); then
+	podman build --quiet --tag "${image}" containers/builder >/dev/null
+	podman run --rm --volume "${work}:/work:Z" "${image}" bash -euo pipefail -c "${build_loop}" _ /work
+else
+	bash -euo pipefail -c "${build_loop}" _ "${work}"
+fi
 
 mkdir -p "${KINETIC_REPO_DIR}"
 find "${work}" -path '*/RPMS/*' -name '*.rpm' -exec cp -p {} "${KINETIC_REPO_DIR}/" \;

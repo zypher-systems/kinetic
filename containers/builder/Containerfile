@@ -5,7 +5,7 @@ FROM registry.fedoraproject.org/fedora:44
 
 RUN dnf -y install \
         kiwi-cli distribution-gpg-keys python3 python3-solv libsolv-tools \
-        rpm-build systemd-rpm-macros createrepo_c rpmlint \
+        rpm-build rpm-sign systemd-rpm-macros createrepo_c dnf5-plugins rpmlint gnupg2 \
         librsvg2-tools ImageMagick && \
     dnf clean all
 

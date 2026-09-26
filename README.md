@@ -23,6 +23,8 @@ sudo ./scripts/build-iso.sh         # build the ISO into out/ (installs kiwi on 
 ./scripts/vm.sh start               # boot it in a UEFI + Secure Boot VM, with a virtual disk to install to
 ```
 
+Kinetic's own packages are published by the [Packages workflow](.github/workflows/packages.yml) whenever they change on `main`: built in a Fedora 44 container, signed with the ZypherOS key (fingerprint `098E 710A DBE3 FEE4 351B 44F4 0EE4 C89F 7AE0 182E`), and served from [zypher-systems.github.io/kinetic](https://zypher-systems.github.io/kinetic/). To publish a change to a package, bump its `Release`.
+
 **SELinux note:** kiwi's SELinux policy (`kiwi-selinux`) blocks rpm 6 from running package user/group scriptlets during the build. `build-iso.sh` makes only kiwi's `kiwi_t` domain permissive while it runs and restores it afterwards, even if the build fails. The rest of the system stays enforcing.
 
 ## Repository layout
