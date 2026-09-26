@@ -18,9 +18,11 @@ On Fedora 44:
 
 ```bash
 ./scripts/check-description.sh      # no root: validate the image description and resolve packages
-sudo ./scripts/build-iso.sh         # build the ISO into out/ (installs kiwi on first run)
+sudo ./scripts/build-iso.sh         # build the ISO into out/ (installs kiwi on first run; see note)
 ./scripts/vm.sh start               # boot it in a UEFI + Secure Boot VM, with a virtual disk to install to
 ```
+
+**SELinux note:** kiwi's SELinux policy (`kiwi-selinux`) blocks rpm 6 from running package user/group scriptlets during the build. `build-iso.sh` makes only kiwi's `kiwi_t` domain permissive while it runs and restores it afterwards, even if the build fails. The rest of the system stays enforcing.
 
 ## Repository layout
 

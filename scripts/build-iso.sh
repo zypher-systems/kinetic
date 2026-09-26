@@ -29,6 +29,7 @@ deps=(
 	kiwi-systemdeps-filesystems
 	kiwi-selinux
 	distribution-gpg-keys
+	policycoreutils-python-utils
 )
 missing=()
 for pkg in "${deps[@]}"; do
@@ -37,6 +38,24 @@ done
 if ((${#missing[@]})); then
 	echo "==> Installing build dependencies: ${missing[*]}"
 	dnf -y install "${missing[@]}"
+fi
+
+# kiwi-selinux confines kiwi to the kiwi_t domain, and that policy blocks
+# rpm 6 from running sysusers scriptlets (kiwi_t -> rpm_script_t). Make only
+# kiwi_t permissive for the build and restore it afterwards, even on failure.
+# The rest of the system stays enforcing, and denials are still logged.
+permissive_added=0
+restore_selinux() {
+	if ((permissive_added)); then
+		echo "==> Restoring SELinux enforcement for kiwi_t"
+		semanage permissive -d kiwi_t || echo "WARNING: could not restore; run: sudo semanage permissive -d kiwi_t" >&2
+	fi
+}
+trap restore_selinux EXIT
+if selinuxenabled && ! semanage permissive -l -n | grep -qw 'kiwi_t'; then
+	echo "==> Making the kiwi_t SELinux domain permissive for this build"
+	semanage permissive -a kiwi_t
+	permissive_added=1
 fi
 
 # A killed kiwi run can leave /dev, /proc, and /sys bind-mounted inside the
@@ -52,6 +71,7 @@ fi
 
 sudo -u "${owner}" mkdir -p "${KINETIC_OUT}"
 sudo -u "${owner}" "${KINETIC_ROOT}/scripts/assemble-description.sh"
+rm -f "${log}"
 
 echo "==> Building ${KINETIC_ISO_NAME} (log: ${log})"
 kiwi-ng --profile="${KINETIC_PROFILE}" --type=iso --kiwi-file=Kinetic.kiwi --logfile="${log}" \
