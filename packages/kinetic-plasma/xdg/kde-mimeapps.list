@@ -1,0 +1,6 @@
+# ZypherOS Kinetic: Chromium is the default browser
+[Default Applications]
+text/html=chromium-browser.desktop
+application/xhtml+xml=chromium-browser.desktop
+x-scheme-handler/http=chromium-browser.desktop
+x-scheme-handler/https=chromium-browser.desktop

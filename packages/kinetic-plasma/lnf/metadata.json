@@ -1,0 +1,21 @@
+{
+    "KPackageStructure": "Plasma/LookAndFeel",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "zypher@zyphersystems.com",
+                "Name": "Zypher Systems"
+            },
+            {
+                "Email": "kde@lists.fedoraproject.org",
+                "Name": "Fedora KDE SIG (Fedora Dark, on which this is based)"
+            }
+        ],
+        "Category": "",
+        "Description": "ZypherOS Kinetic: Breeze Dark with ZypherOS branding",
+        "Id": "org.zypheros.kinetic.desktop",
+        "License": "GPLv2+",
+        "Name": "ZypherOS Kinetic",
+        "Website": "https://github.com/zypher-systems/kinetic"
+    }
+}

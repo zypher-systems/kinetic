@@ -1,0 +1,9 @@
+# Microsoft Visual Studio Code, for its Microsoft-only extensions (Dev
+# Containers, Remote-SSH, Pylance, C/C++, Copilot). Kinetic defaults to
+# VSCodium; enable this with: sudo dnf config-manager setopt code.enabled=1
+[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=0
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-microsoft

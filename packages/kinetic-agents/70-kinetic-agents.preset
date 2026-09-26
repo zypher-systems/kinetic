@@ -1,0 +1,2 @@
+# ZypherOS Kinetic: install Cursor and Grok Bot on first boot
+enable kinetic-firstboot-apps.service

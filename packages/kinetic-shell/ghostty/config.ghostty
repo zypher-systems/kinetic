@@ -1,0 +1,9 @@
+# ZypherOS Kinetic defaults for Ghostty. Add your own settings below.
+# The font is Ghostty's built-in JetBrains Mono with Nerd Font symbols.
+command = /usr/bin/fish
+shell-integration = fish
+theme = Carbonfox
+font-size = 12
+background-opacity = 0.9
+window-width = 110
+window-height = 40

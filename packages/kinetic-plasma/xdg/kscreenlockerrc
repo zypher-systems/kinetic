@@ -1,0 +1,4 @@
+# ZypherOS Kinetic lock screen wallpaper
+[Greeter][Wallpaper][org.kde.image][General]
+Image=file:///usr/share/wallpapers/ZypherOS-Kinetic/
+PreviewImage=file:///usr/share/wallpapers/ZypherOS-Kinetic/

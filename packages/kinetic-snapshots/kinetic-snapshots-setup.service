@@ -1,0 +1,17 @@
+[Unit]
+Description=Set up btrfs snapshots for ZypherOS Kinetic
+Documentation=https://github.com/zypher-systems/kinetic
+# Installed systems only, once
+ConditionKernelCommandLine=!rd.live.image
+ConditionPathExists=!/var/lib/kinetic/snapshots-setup.done
+After=local-fs.target
+# Container and VM storage must become subvolumes before first use
+Before=docker.service docker.socket containerd.service podman.service podman.socket libvirtd.service virtqemud.service kinetic-firstboot-apps.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/kinetic/snapshots-setup
+
+[Install]
+WantedBy=multi-user.target

@@ -12,7 +12,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 keydir="${ZYPHEROS_SIGNING_DIR:-${HOME}/.config/zypheros-signing}"
-pubkey="${KINETIC_ROOT}/packages/kinetic-repos/RPM-GPG-KEY-zypheros"
+pubkey="${KINETIC_ROOT}/packages/kinetic-repos/keys/RPM-GPG-KEY-zypheros"
 
 if [[ -e "${keydir}/private.asc" ]]; then
 	echo "A signing key already exists in ${keydir}; refusing to overwrite it." >&2

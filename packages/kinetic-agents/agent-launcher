@@ -1,0 +1,58 @@
+#!/usr/bin/bash
+# ZypherOS Kinetic agent launcher.
+#
+# Installed as claude, opencode, grok, codex, copilot, and gemini in a
+# directory at the end of PATH. The first time you run one, it installs the
+# agent for your user from the vendor's official source, then runs it. From
+# then on the agent's own install comes first in PATH and updates itself.
+set -euo pipefail
+
+name="$(basename "$0")"
+
+case "${name}" in
+	claude)
+		title="Claude Code"; bin="${HOME}/.local/bin/claude"; source_url="https://claude.ai/install.sh"
+		install_agent() { curl -fsSL "${source_url}" | bash -s stable; } ;;
+	opencode)
+		title="OpenCode"; bin="${HOME}/.opencode/bin/opencode"; source_url="https://opencode.ai/install"
+		install_agent() { curl -fsSL "${source_url}" | bash; } ;;
+	grok)
+		title="Grok Build"; bin="${HOME}/.grok/bin/grok"; source_url="https://x.ai/cli/install.sh"
+		install_agent() { curl -fsSL "${source_url}" | bash; } ;;
+	codex)
+		title="Codex"; bin="${HOME}/.local/bin/codex"; source_url="https://chatgpt.com/codex/install.sh"
+		install_agent() { curl -fsSL "${source_url}" | sh; } ;;
+	copilot)
+		title="GitHub Copilot CLI"; bin="${HOME}/.local/bin/copilot"; source_url="https://gh.io/copilot-install"
+		install_agent() { curl -fsSL "${source_url}" | PREFIX="${HOME}/.local" bash; } ;;
+	gemini)
+		title="Gemini CLI"; bin="${HOME}/.local/bin/gemini"; source_url="npm: @google/gemini-cli"
+		install_agent() { npm install --global --prefix "${HOME}/.local" @google/gemini-cli; } ;;
+	*)
+		echo "kinetic agent launcher: unknown agent '${name}'" >&2
+		exit 2 ;;
+esac
+
+if [[ ! -x "${bin}" ]]; then
+	# Serialize first runs, e.g. two terminals opened at once
+	lockdir="${XDG_RUNTIME_DIR:-/tmp}/kinetic-agents"
+	mkdir -p "${lockdir}"
+	exec 9>"${lockdir}/${name}.lock"
+	flock 9
+	if [[ ! -x "${bin}" ]]; then
+		echo "Installing ${title} for $(id -un) from ${source_url} (first run)..." >&2
+		if ! install_agent >&2; then
+			echo "Could not install ${title}. Check your internet connection and run '${name}' again." >&2
+			exit 1
+		fi
+		if [[ ! -x "${bin}" ]]; then
+			echo "${title} installed, but ${bin} was not found." >&2
+			exit 1
+		fi
+		echo "${title} is installed. It updates itself from now on." >&2
+	fi
+	flock -u 9
+	exec 9>&-
+fi
+
+exec "${bin}" "$@"

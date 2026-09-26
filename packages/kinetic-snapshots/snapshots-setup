@@ -1,0 +1,57 @@
+#!/usr/bin/bash
+# Set up btrfs snapshots on the first boot of an installed ZypherOS Kinetic
+# system: separate subvolumes for container and VM storage, so rolling back
+# the OS never touches them, and a snapper configuration for the root
+# filesystem with a baseline snapshot. dnf then snapshots before and after
+# every transaction (/etc/dnf/libdnf5-plugins/actions.d/snapper.actions).
+set -euo pipefail
+
+stamp=/var/lib/kinetic/snapshots-setup.done
+install -d /var/lib/kinetic
+
+if [[ "$(findmnt --noheadings --output FSTYPE /)" != btrfs ]]; then
+	echo "The root filesystem is not btrfs; snapshots are not available."
+	touch "${stamp}"
+	exit 0
+fi
+
+# Nested subvolumes are left out of snapshots of the root subvolume
+for dir in /var/lib/docker /var/lib/containers /var/lib/libvirt/images; do
+	if btrfs subvolume show "${dir}" >/dev/null 2>&1; then
+		continue
+	fi
+	if [[ -d "${dir}" ]]; then
+		if [[ -n "$(ls -A "${dir}")" ]]; then
+			echo "Leaving ${dir} as a directory: it already has data."
+			continue
+		fi
+		mode="$(stat -c %a "${dir}")"
+		owner="$(stat -c %u:%g "${dir}")"
+		rmdir "${dir}"
+	else
+		mode=711
+		owner=0:0
+		install -d "$(dirname "${dir}")"
+	fi
+	btrfs subvolume create "${dir}"
+	chmod "${mode}" "${dir}"
+	chown "${owner}" "${dir}"
+	restorecon "${dir}"
+	echo "Created subvolume ${dir}"
+done
+
+if ! snapper -c root get-config >/dev/null 2>&1; then
+	snapper -c root create-config /
+	snapper -c root set-config \
+		TIMELINE_CREATE=no \
+		NUMBER_LIMIT=30 \
+		NUMBER_LIMIT_IMPORTANT=10 \
+		ALLOW_GROUPS=wheel \
+		SYNC_ACL=yes
+	restorecon -R /.snapshots
+fi
+snapper -c root create --description "ZypherOS Kinetic first boot" --userdata important=yes
+systemctl enable --now snapper-cleanup.timer
+
+touch "${stamp}"
+echo "Snapshots are set up."

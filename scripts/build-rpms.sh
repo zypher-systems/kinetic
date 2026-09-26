@@ -30,7 +30,9 @@ for pkg in "${packages[@]}"; do
 	[[ -f "${spec}" ]] || { echo "No spec at ${spec}" >&2; exit 1; }
 	mkdir -p "${work}/${pkg}/SPECS" "${work}/${pkg}/SOURCES"
 	cp -p "${spec}" "${work}/${pkg}/SPECS/"
-	find "packages/${pkg}" -maxdepth 1 -type f ! -name '*.spec' -exec cp -p {} "${work}/${pkg}/SOURCES/" \;
+	# Package files keep their layout; branding sources are flattened in
+	cp -a "packages/${pkg}/." "${work}/${pkg}/SOURCES/"
+	rm -f "${work}/${pkg}/SOURCES/${pkg}.spec"
 	find branding -type f ! -name README.md -exec cp -p {} "${work}/${pkg}/SOURCES/" \;
 done
 
