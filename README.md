@@ -7,7 +7,7 @@ Kinetic is the desktop edition of **ZypherOS**, an agentic Linux distribution fr
 ## What it is
 
 - **Fedora 44 + KDE Plasma, mutable.** `dnf` works as usual. btrfs snapshots are the safety net, so any change can be rolled back.
-- **Agents are part of the OS.** Claude Code, OpenCode, Grok Build, Grok Bot, Cursor, and VS Code come installed as standard, from their official sources. A system agent that helps manage the machine is planned after the first release.
+- **Agents are part of the OS.** Claude Code, OpenCode, Grok Build, Codex, Gemini CLI, and Copilot CLI are ready to run and install from their official sources on first launch. VSCodium, Cursor, and Grok Bot come as standard. A system agent that helps manage the machine is planned after the first release.
 - **A developer workstation out of the box.** Docker, Podman, distrobox, KVM with virt-manager, fish + starship, Ghostty, and Chromium.
 
 See [docs/decisions.md](docs/decisions.md) for what has been decided so far and why.

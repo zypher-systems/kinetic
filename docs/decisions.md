@@ -12,8 +12,8 @@ The first ISO: a bootable live image with an installer, tested in a VM first and
 | Identity | ZypherOS Kinetic 0.1.0 in `os-release`; circuit-Z logo (recreated as SVG) on boot splash, login screen, app launcher, installer, fastfetch; wallpaper *Zypher Systems 4K-2* on desktop, lock screen, login screen; Breeze Dark with a Zypher-blue accent |
 | Shell and terminal | fish (default for new users) + starship; Ghostty as default terminal, Konsole kept as fallback; the reference machine's fish, Ghostty, and fastfetch configs with fixes applied |
 | Browser | Chromium |
-| Standard agents and editors | Installed automatically, from official sources only (see [Agent installation](#agent-installation)): Claude Code (stable channel), Grok Bot, Cursor, and VS Code at first boot; OpenCode and Grok Build at each user's first login |
-| Other agents | Codex, Gemini CLI, and Copilot CLI as launchers that install from the official source the first time they are run |
+| CLI agents | Claude Code (stable channel), OpenCode, Grok Build, Codex, Gemini CLI, Copilot CLI: each installs from its official source the first time it is run (see [Agent installation](#agent-installation)) |
+| Editors and desktop agents | VSCodium in the ISO; Grok Bot and Cursor installed at first boot from their vendors' repositories; Microsoft's VS Code repository included but disabled |
 | Containers and VMs | Docker CE (buildx, compose plugin), Podman, distrobox; qemu-kvm, libvirt, swtpm, UEFI firmware, virt-manager |
 | Dev tools | git, gh, glab, just, gcc/clang/cmake/ninja/make, Node.js, Python + uv, Go, Rust via rustup, Tauri build libraries (WebKitGTK 4.1, GTK3, libappindicator, librsvg, OpenSSL) |
 | CLI tools | starship, zoxide, fzf, eza, bat, ripgrep, fd, btop, fastfetch, tmux, neovim |
@@ -76,18 +76,27 @@ Tauri is the planned stack (Rust with a web UI), so Rust and Tauri's build libra
 
 ### Agent installation
 
-Kinetic never redistributes proprietary agent binaries in its ISO. The vendors' repositories come preconfigured, and everything installs from its official source, so each agent is current on day one.
+Kinetic never redistributes proprietary agent binaries in its ISO. Everything installs from its official source, so each agent is current on day one.
 
-| Agent | Official source | Installed | Updates |
-| --- | --- | --- | --- |
-| Claude Code | Anthropic's signed dnf repository, `stable` channel (`downloads.claude.ai/claude-code/rpm/stable`) | First boot | `dnf upgrade` |
-| Grok Bot | Anysphere's signed `grok-bot` dnf repository (`downloads.cursor.com/yumrepo/grok-bot`) | First boot | `dnf upgrade` |
-| Cursor | Anysphere's signed dnf repository (`downloads.cursor.com/yumrepo`) | First boot | `dnf upgrade` |
-| VS Code | Microsoft's dnf repository | First boot | `dnf upgrade` |
-| OpenCode | Official installer, into `~/.opencode` (MIT) | Each user's first login | Self-updating |
-| Grok Build | Official installer from `x.ai/cli`, into `~/.grok` (source Apache-2.0) | Each user's first login | Self-updating |
+**CLI agents install on first launch.** Every CLI agent ships as a small launcher. The first time it runs, it installs the agent with the vendor's official per-user installer, then hands over to it. From then on the agent updates itself, with no sudo needed. This works in the live USB session too. The first run needs internet.
 
-A first-boot service installs the dnf-packaged apps and retries when the network comes up, so a machine installed offline catches up once connected. These agents are not present in the live USB session.
+| CLI agent | Official installer | Installs into |
+| --- | --- | --- |
+| Claude Code | `claude.ai/install.sh`, `stable` channel | `~/.local/share/claude` |
+| OpenCode | `opencode.ai/install` (MIT) | `~/.opencode` |
+| Grok Build | `x.ai/cli/install.sh` (source Apache-2.0) | `~/.grok` |
+| Codex, Gemini CLI, Copilot CLI | Each vendor's official package | User's home directory |
+
+**GUI apps install at first boot.** A first-boot service installs them from their vendors' signed dnf repositories and retries when the network comes up, so a machine installed offline catches up once connected. They update with `dnf upgrade`.
+
+| App | Repository |
+| --- | --- |
+| Grok Bot | Anysphere's `grok-bot` repository (`downloads.cursor.com/yumrepo/grok-bot`) |
+| Cursor | Anysphere's repository (`downloads.cursor.com/yumrepo`) |
+
+### Editor: VSCodium by default
+
+VSCodium is the MIT-licensed build of VS Code without Microsoft's telemetry or branding. Because it is open source it ships inside the ISO, from the VSCodium RPM repository. Its extensions come from Open VSX, which has the Claude Code, rust-analyzer, Tauri, Docker, Python, and clangd extensions. Microsoft keeps some extensions to its own VS Code: Dev Containers, Remote-SSH, Pylance, the C/C++ tools, and GitHub Copilot. For those, Microsoft's VS Code repository ships disabled, one command away. VSCodium also trails VS Code by a few releases.
 
 ## Proposed, not yet confirmed
 
