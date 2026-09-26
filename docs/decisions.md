@@ -70,6 +70,16 @@ Docker CE comes from Docker's own repository. Podman ships alongside it without 
 
 fish with starship, Ghostty, and Chromium. Agents drive their own separate Chromium profile and never touch the user's.
 
+### Packages and updates
+
+Kinetic's own packages (identity, branding, defaults, agent launchers) live in `packages/` in this repository. They are built in a rootless Fedora 44 container, signed with a Zypher Systems key, and published by GitHub Actions to GitHub Pages at `zypher-systems.github.io/kinetic` whenever `main` changes. Installed systems update from there alongside Fedora. Fedora Copr was the alternative; it would have required relicensing the artwork, and packages would be signed with Copr's key rather than ours.
+
+### Identity and branding
+
+- `zypheros-release` replaces Fedora's release packages, following Fedora's own `generic-release` template for remixes. `os-release` says `NAME="ZypherOS"`, `ID=zypheros`, `ID_LIKE=fedora`, `PRETTY_NAME="ZypherOS Kinetic 0.1.0"`. `VERSION_ID` stays `44`, because dnf, RPM Fusion, and third-party installers use it to pick packages.
+- `zypheros-logos` replaces `fedora-logos` under the same file and icon names, as Fedora's `generic-logos` does, so the installer, boot splash, Plasma launcher, and About page show ZypherOS artwork without patching anything.
+- The logo is the circuit-Z mark, recreated as SVG for build 1, with a simplified version for sizes of 32 px and below. The wordmark reads ZYPHER**OS** / KINETIC in Montserrat. Sources are in `branding/`; the artwork is all rights reserved.
+
 ### Native desktop apps
 
 Tauri is the planned stack (Rust with a web UI), so Rust and Tauri's build libraries ship on the host.
@@ -104,7 +114,7 @@ VSCodium is the MIT-licensed build of VS Code without Microsoft's telemetry or b
 
 ## Open questions
 
-- Where Kinetic's own packages are hosted so installed systems get updates (Fedora COPR or GitHub)
+- Where ISOs are published: at 3.3 GB they exceed GitHub's 2 GB limit per release file
 - How to boot into snapshots on Fedora (grub-btrfs is not packaged)
 - Local AI runtime, when it is added (Fedora's Ollama is 0.12; upstream Ollama or RamaLama are alternatives)
 

@@ -17,6 +17,7 @@ See [docs/decisions.md](docs/decisions.md) for what has been decided so far and 
 On Fedora 44:
 
 ```bash
+./scripts/build-rpms.sh             # no root: build Kinetic's own packages into out/repo
 ./scripts/check-description.sh      # no root: validate the image description and resolve packages
 sudo ./scripts/build-iso.sh         # build the ISO into out/ (installs kiwi on first run; see note)
 ./scripts/vm.sh start               # boot it in a UEFI + Secure Boot VM, with a virtual disk to install to
@@ -31,7 +32,9 @@ sudo ./scripts/build-iso.sh         # build the ISO into out/ (installs kiwi on 
 | `kiwi/Kinetic.kiwi`, `kiwi/kinetic/` | Kinetic's kiwi image description |
 | `kiwi/fedora/` | Fedora's kiwi descriptions, vendored unmodified (GPL-3.0; see its `SNAPSHOT`) |
 | `kiwi/config.sh` | Runs inside the image during the build: Fedora's config, then Kinetic's |
-| `scripts/` | Build, check, and VM test scripts |
+| `packages/` | Kinetic's own RPMs: identity, logos, wallpaper, defaults |
+| `branding/` | Source artwork (all rights reserved; see `branding/COPYING`) |
+| `scripts/` | Build, check, signing-key, and VM test scripts |
 | `containers/builder/` | Rootless container used by `check-description.sh` |
 | `docs/decisions.md` | Decisions made so far, alternatives considered, open questions |
 | `import/devbox/` | Raw configs and wallpaper from the reference dev machine, source material for Kinetic's defaults |
