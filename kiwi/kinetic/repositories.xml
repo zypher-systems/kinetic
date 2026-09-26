@@ -1,0 +1,56 @@
+<image>
+	<!--
+	  Repositories used to build the image, in addition to Fedora's (fedora/
+	  repositories/core.xml). Installed systems get their repositories from
+	  packages instead: fedora-repos, rpmfusion-*-release, and kinetic-repos.
+	  @KINETIC_ROOT@ and @KINETIC_REPO_DIR@ are filled in by
+	  scripts/assemble-description.sh.
+	-->
+
+	<!-- Kinetic's own packages, built locally by scripts/build-rpms.sh -->
+	<repository type="rpm-md" alias="kinetic-local" priority="1" package_gpgcheck="false">
+		<source path="dir://@KINETIC_REPO_DIR@"/>
+	</repository>
+
+	<repository type="rpm-md" alias="rpmfusion-free" sourcetype="metalink">
+		<source path="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-$releasever&amp;arch=$basearch">
+			<signing key="file:///usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"/>
+		</source>
+	</repository>
+	<repository type="rpm-md" alias="rpmfusion-free-updates" sourcetype="metalink">
+		<source path="https://mirrors.rpmfusion.org/metalink?repo=free-fedora-updates-released-$releasever&amp;arch=$basearch">
+			<signing key="file:///usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-free-fedora-$releasever"/>
+		</source>
+	</repository>
+	<repository type="rpm-md" alias="rpmfusion-nonfree" sourcetype="metalink">
+		<source path="https://mirrors.rpmfusion.org/metalink?repo=nonfree-fedora-$releasever&amp;arch=$basearch">
+			<signing key="file:///usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-nonfree-fedora-$releasever"/>
+		</source>
+	</repository>
+	<repository type="rpm-md" alias="rpmfusion-nonfree-updates" sourcetype="metalink">
+		<source path="https://mirrors.rpmfusion.org/metalink?repo=nonfree-fedora-updates-released-$releasever&amp;arch=$basearch">
+			<signing key="file:///usr/share/distribution-gpg-keys/rpmfusion/RPM-GPG-KEY-rpmfusion-nonfree-fedora-$releasever"/>
+		</source>
+	</repository>
+
+	<repository type="rpm-md" alias="docker-ce-stable">
+		<source path="https://download.docker.com/linux/fedora/$releasever/$basearch/stable">
+			<signing key="file://@KINETIC_ROOT@/packages/kinetic-repos/keys/RPM-GPG-KEY-docker-ce"/>
+		</source>
+	</repository>
+	<repository type="rpm-md" alias="vscodium">
+		<source path="https://download.vscodium.com/rpms/">
+			<signing key="file://@KINETIC_ROOT@/packages/kinetic-repos/keys/RPM-GPG-KEY-vscodium"/>
+		</source>
+	</repository>
+	<repository type="rpm-md" alias="copr-scottames-ghostty">
+		<source path="https://download.copr.fedorainfracloud.org/results/scottames/ghostty/fedora-$releasever-$basearch/">
+			<signing key="file://@KINETIC_ROOT@/packages/kinetic-repos/keys/RPM-GPG-KEY-copr-scottames-ghostty"/>
+		</source>
+	</repository>
+	<repository type="rpm-md" alias="copr-atim-starship">
+		<source path="https://download.copr.fedorainfracloud.org/results/atim/starship/fedora-$releasever-$basearch/">
+			<signing key="file://@KINETIC_ROOT@/packages/kinetic-repos/keys/RPM-GPG-KEY-copr-atim-starship"/>
+		</source>
+	</repository>
+</image>

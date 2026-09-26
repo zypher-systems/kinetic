@@ -26,6 +26,7 @@ Source5:        80-kde-desktop.preset
 Source6:        81-desktop.preset
 Source7:        20-fedora-defaults.conf
 Source8:        plasma-desktop.conf
+Source9:        zypheros-kinetic.conf
 
 # dnf5 derives $releasever from the package that provides system-release
 Provides:       system-release
@@ -44,7 +45,8 @@ Conflicts:      generic-release-common
 %description
 Release files that identify the system as ZypherOS Kinetic, the desktop
 edition of ZypherOS, based on Fedora Linux %{dist_version}: os-release, issue,
-rpm dist macros, and Fedora's systemd presets for KDE Plasma desktops.
+rpm dist macros, Fedora's systemd presets for KDE Plasma desktops, and the
+installer profile.
 
 
 %prep
@@ -126,6 +128,9 @@ install -Dm0644 %{SOURCE3} -t %{buildroot}%{_prefix}/lib/systemd/user-preset/
 install -Dm0644 %{SOURCE7} %{buildroot}%{_datadir}/dnf5/libdnf.conf.d/20-zypheros-defaults.conf
 install -Dm0644 %{SOURCE8} -t %{buildroot}%{_sysconfdir}/dnf/protected.d/
 
+# Installer settings, inherited from Fedora KDE's Anaconda profile
+install -Dm0644 %{SOURCE9} -t %{buildroot}%{_sysconfdir}/anaconda/profile.d/
+
 install -d licenses
 install -pm 0644 %{SOURCE0} licenses/LICENSE
 
@@ -157,6 +162,9 @@ install -pm 0644 %{SOURCE0} licenses/LICENSE
 %{_prefix}/lib/systemd/user-preset/99-default-disable.preset
 %{_datadir}/dnf5/libdnf.conf.d/20-zypheros-defaults.conf
 %config(noreplace) %{_sysconfdir}/dnf/protected.d/plasma-desktop.conf
+%dir %{_sysconfdir}/anaconda
+%dir %{_sysconfdir}/anaconda/profile.d
+%{_sysconfdir}/anaconda/profile.d/zypheros-kinetic.conf
 
 
 %changelog

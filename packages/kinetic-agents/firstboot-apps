@@ -1,6 +1,7 @@
 #!/usr/bin/bash
-# Install ZypherOS Kinetic's standard GUI agents from their vendors'
-# repositories on the first boot of an installed system. Kinetic doesn't
+# Install ZypherOS Kinetic's standard GUI apps on the first boot: Cursor and
+# Grok Bot from their vendors' repositories, Flatseal and Gear Lever from
+# Flathub. Runs on the first boot of an installed system. Kinetic doesn't
 # redistribute them in its ISO, so they are always current. The systemd unit
 # retries until this succeeds, e.g. after an offline install.
 set -euo pipefail
@@ -36,6 +37,10 @@ fi
 
 dnf -y install cursor grok-bot
 
+# Flatpak helpers from Flathub (fedora-flathub-remote configures the remote)
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install -y --noninteractive flathub com.github.tchx84.Flatseal it.mijorus.gearlever
+
 install -d /var/lib/kinetic
 touch "${stamp}"
-echo "Cursor and Grok Bot are installed."
+echo "Cursor, Grok Bot, Flatseal, and Gear Lever are installed."

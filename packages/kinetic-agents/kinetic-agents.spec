@@ -29,6 +29,7 @@ Requires:       util-linux
 # Gemini CLI installs through npm
 Requires:       nodejs-npm
 Requires:       dnf5
+Requires:       flatpak
 %{?systemd_requires}
 
 %global agents claude opencode grok codex copilot gemini

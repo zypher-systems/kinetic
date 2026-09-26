@@ -23,4 +23,12 @@ if [[ -d "${KINETIC_ROOT}/kiwi/root" ]]; then
 	cp -a "${KINETIC_ROOT}/kiwi/root/." "${dest}/root/"
 fi
 
+# Fill in local paths: the signing keys and the locally built package repo.
+# The check runs in a container, where these live elsewhere.
+root_path="${KINETIC_ASSEMBLE_ROOT:-${KINETIC_ROOT}}"
+repo_path="${KINETIC_ASSEMBLE_REPO_DIR:-${KINETIC_REPO_DIR}}"
+find "${dest}/kinetic" -name '*.xml' -exec sed -i \
+	-e "s|@KINETIC_ROOT@|${root_path}|g" \
+	-e "s|@KINETIC_REPO_DIR@|${repo_path}|g" {} +
+
 echo "Description staged in ${dest}"

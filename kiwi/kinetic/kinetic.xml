@@ -4,17 +4,163 @@
 		  The name must contain "KDE", "Desktop", and "Live": Fedora's config.sh
 		  matches on those substrings to set up the KDE live session, the
 		  graphical target, and the locked root account.
+		  It replaces Fedora's KDE-Desktop and DesktopCommon profiles so the
+		  package set is ours: DesktopCommon requests mediawriter explicitly,
+		  and dnf refuses to exclude an explicitly requested package.
 		-->
 		<profile name="Kinetic-KDE-Desktop-Live" description="ZypherOS Kinetic live ISO">
-			<requires profile="KDE-Desktop"/>
+			<requires profile="BaseCommon"/>
+			<requires profile="HardwareCommon"/>
 			<requires profile="LiveInstall"/>
 		</profile>
 	</profiles>
-	<!-- Milestone 1 baseline: the same packages as Fedora's KDE-Desktop-Live profile -->
+
 	<packages type="bootstrap" patternType="plusRecommended" profiles="Kinetic-KDE-Desktop-Live">
-		<package name="fedora-release-kde"/>
+		<package name="zypheros-release"/>
 	</packages>
+
 	<packages type="image" patternType="plusRecommended" profiles="Kinetic-KDE-Desktop-Live">
-		<package name="plasma-welcome-fedora"/>
+		<!-- Fedora's DesktopCommon, without Fedora Media Writer -->
+		<namedCollection name="fonts"/>
+		<namedCollection name="multimedia"/>
+		<namedCollection name="networkmanager-submodules"/>
+		<namedCollection name="printing"/>
+		<namedCollection name="guest-desktop-agents"/>
+		<ignore name="gfs2-utils"/>
+		<ignore name="reiserfs-utils"/>
+
+		<!-- KDE Plasma: the groups of Fedora's kde-desktop-environment, without
+		     its default firefox and kde-pim groups -->
+		<namedCollection name="admin-tools"/>
+		<namedCollection name="base-graphical"/>
+		<namedCollection name="core"/>
+		<namedCollection name="desktop-accessibility"/>
+		<namedCollection name="dial-up"/>
+		<namedCollection name="input-methods"/>
+		<namedCollection name="kde-desktop"/>
+		<namedCollection name="kde-apps"/>
+		<namedCollection name="kde-media"/>
+		<namedCollection name="libreoffice"/>
+		<package name="libreoffice-draw"/>
+		<package name="libreoffice-math"/>
+		<package name="fuse"/>
+		<package name="kde-l10n"/>
+
+		<!-- ZypherOS Kinetic -->
+		<package name="zypheros-logos"/>
+		<package name="kinetic-repos"/>
+		<package name="kinetic-backgrounds"/>
+		<package name="kinetic-plasma"/>
+		<package name="kinetic-shell"/>
+		<package name="kinetic-agents"/>
+		<package name="kinetic-snapshots"/>
+
+		<!-- RPM Fusion, full codecs, and hardware video decode/encode -->
+		<package name="rpmfusion-free-release"/>
+		<package name="rpmfusion-nonfree-release"/>
+		<package name="ffmpeg"/>
+		<package name="mesa-va-drivers-freeworld"/>
+		<package name="intel-media-driver"/>
+		<package name="gstreamer1-plugins-bad-freeworld"/>
+		<package name="gstreamer1-plugins-ugly"/>
+
+		<!-- Browser, terminal, editor -->
+		<package name="chromium"/>
+		<package name="ghostty"/>
+		<package name="codium"/>
+
+		<!-- Containers and virtual machines -->
+		<package name="docker-ce"/>
+		<package name="docker-ce-cli"/>
+		<package name="containerd.io"/>
+		<package name="docker-buildx-plugin"/>
+		<package name="docker-compose-plugin"/>
+		<package name="podman"/>
+		<package name="distrobox"/>
+		<package name="qemu-kvm"/>
+		<package name="libvirt-daemon-kvm"/>
+		<package name="virt-manager"/>
+		<package name="virt-install"/>
+		<package name="virt-viewer"/>
+		<package name="swtpm"/>
+		<package name="edk2-ovmf"/>
+
+		<!-- Developer tools, including Tauri's build libraries -->
+		<package name="git"/>
+		<package name="gh"/>
+		<package name="glab"/>
+		<package name="just"/>
+		<package name="gcc"/>
+		<package name="gcc-c++"/>
+		<package name="clang"/>
+		<package name="make"/>
+		<package name="cmake"/>
+		<package name="ninja-build"/>
+		<package name="nodejs"/>
+		<package name="nodejs-npm"/>
+		<package name="python3"/>
+		<package name="uv"/>
+		<package name="golang"/>
+		<package name="rustup"/>
+		<package name="webkit2gtk4.1-devel"/>
+		<package name="openssl-devel"/>
+		<package name="gtk3-devel"/>
+		<package name="libappindicator-gtk3-devel"/>
+		<package name="librsvg2-devel"/>
+		<package name="libxdo-devel"/>
+		<package name="neovim"/>
+		<package name="tmux"/>
+
+		<!-- Desktop apps -->
+		<package name="gimp"/>
+		<package name="inkscape"/>
+		<package name="blender"/>
+		<package name="obs-studio"/>
+
+		<!-- Networking (installed, off until enabled) -->
+		<package name="tailscale"/>
+		<package name="syncthing"/>
+
+		<!-- Firmware updates -->
+		<package name="fwupd"/>
+
+		<!-- Fedora KDE's own exclusions -->
+		<ignore name="gnome-disk-utility"/>
+		<ignore name="mariadb-server-utils"/>
+		<ignore name="system-config-language"/>
+		<ignore name="system-config-printer"/>
+		<ignore name="tracker"/>
+		<ignore name="tracker-miners"/>
+		<ignore name="digikam"/>
+		<ignore name="k3b"/>
+		<ignore name="kipi-plugins"/>
+		<ignore name="krusader"/>
+		<ignore name="ktorrent"/>
+		<ignore name="initial-setup"/>
+
+		<!-- Kinetic removals: Firefox (Chromium instead), KDE PIM and Akonadi,
+		     ABRT (reports to Fedora), KDE games, Fedora-branded packages -->
+		<ignore name="firefox"/>
+		<ignore name="akonadi-server"/>
+		<ignore name="akonadi-server-mysql"/>
+		<ignore name="abrt*"/>
+		<ignore name="kmahjongg"/>
+		<ignore name="kmines"/>
+		<ignore name="kpat"/>
+		<ignore name="mediawriter"/>
+		<ignore name="plasma-welcome-fedora"/>
+		<ignore name="fedora-release*"/>
+		<ignore name="fedora-logos*"/>
+
+		<!-- Replaced by RPM Fusion's full versions -->
+		<ignore name="ffmpeg-free"/>
+		<ignore name="libavcodec-free"/>
+		<ignore name="libavdevice-free"/>
+		<ignore name="libavfilter-free"/>
+		<ignore name="libavformat-free"/>
+		<ignore name="libavutil-free"/>
+		<ignore name="libswresample-free"/>
+		<ignore name="libswscale-free"/>
+		<ignore name="mesa-va-drivers"/>
 	</packages>
 </image>

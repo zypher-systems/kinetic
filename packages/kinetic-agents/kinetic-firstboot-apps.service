@@ -1,5 +1,5 @@
 [Unit]
-Description=Install ZypherOS Kinetic's standard apps (Cursor, Grok Bot)
+Description=Install ZypherOS Kinetic's standard apps (Cursor, Grok Bot, Flatseal, Gear Lever)
 Documentation=https://github.com/zypher-systems/kinetic
 Wants=network-online.target
 After=network-online.target kinetic-snapshots-setup.service

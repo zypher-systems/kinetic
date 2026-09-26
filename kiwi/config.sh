@@ -12,4 +12,12 @@ rm -rf /kinetic-build
 
 echo "Configure Kinetic: [$kiwi_iname]-[$kiwi_profiles]..."
 
+#======================================
+# Containers and VMs without sudo
+#--------------------------------------
+## Users created by Plasma Setup on first boot join docker and libvirt
+sed -i -e 's/^UserGroups=.*/UserGroups=wheel,docker,libvirt/' /etc/xdg/plasmasetuprc
+## Start Docker on first use rather than at every boot
+systemctl enable docker.socket
+
 exit 0
