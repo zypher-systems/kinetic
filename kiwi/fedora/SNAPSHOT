@@ -1,0 +1,10 @@
+Vendored, unmodified snapshot of Fedora's kiwi image descriptions.
+
+Source:  https://forge.fedoraproject.org/releng/fedora-kiwi-descriptions
+Branch:  f44
+Commit:  dfc49a5a10f69941179fdadd96aa6a5984f7c677 (2026-04-01)
+License: GPL-3.0-or-later (see COPYING); applies to this directory only
+
+Removed from the snapshot: tmt/ and CI configuration (Fedora's own test plans).
+To refresh: replace this directory's contents with `git archive` of a newer f44 commit,
+then update the commit above.

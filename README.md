@@ -12,16 +12,31 @@ Kinetic is the desktop edition of **ZypherOS**, an agentic Linux distribution fr
 
 See [docs/decisions.md](docs/decisions.md) for what has been decided so far and why.
 
+## Building
+
+On Fedora 44:
+
+```bash
+./scripts/check-description.sh      # no root: validate the image description and resolve packages
+sudo ./scripts/build-iso.sh         # build the ISO into out/ (installs kiwi on first run)
+./scripts/vm.sh start               # boot it in a UEFI + Secure Boot VM, with a virtual disk to install to
+```
+
 ## Repository layout
 
 | Path | Purpose |
 | --- | --- |
+| `kiwi/Kinetic.kiwi`, `kiwi/kinetic/` | Kinetic's kiwi image description |
+| `kiwi/fedora/` | Fedora's kiwi descriptions, vendored unmodified (GPL-3.0; see its `SNAPSHOT`) |
+| `kiwi/config.sh` | Runs inside the image during the build: Fedora's config, then Kinetic's |
+| `scripts/` | Build, check, and VM test scripts |
+| `containers/builder/` | Rootless container used by `check-description.sh` |
 | `docs/decisions.md` | Decisions made so far, alternatives considered, open questions |
 | `import/devbox/` | Raw configs and wallpaper from the reference dev machine, source material for Kinetic's defaults |
 
 ## License
 
-The code in this repository is released under the [MIT License](LICENSE).
+The code in this repository is released under the [MIT License](LICENSE), except `kiwi/fedora/`, which is Fedora's work under GPL-3.0-or-later.
 
 The Zypher Systems and ZypherOS names, logos, and wallpapers are trademarks of Zypher Systems and are **not** covered by the MIT License.
 

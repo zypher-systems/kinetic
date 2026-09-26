@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Test the Kinetic ISO in a KVM virtual machine (no root needed).
+# UEFI with Secure Boot enabled, 8 GB RAM, 4 CPUs, a 64 GB virtual disk.
+#
+#   ./scripts/vm.sh start              # boot the ISO in a window; install to the virtual disk from there
+#   ./scripts/vm.sh start --disk       # boot the installed virtual disk
+#   ./scripts/vm.sh start --headless   # no window; drive it with screenshot/key
+#   ./scripts/vm.sh screenshot FILE.png
+#   ./scripts/vm.sh key ret            # send keys (QEMU sendkey names, e.g. ctrl-alt-f2)
+#   ./scripts/vm.sh stop
+#   ./scripts/vm.sh reset              # delete the virtual disk and firmware settings
+set -euo pipefail
+
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+
+vm_dir="${KINETIC_OUT}/vm"
+disk="${vm_dir}/disk.qcow2"
+vars="${vm_dir}/OVMF_VARS.fd"
+monitor="${vm_dir}/monitor.sock"
+ovmf_dir="/usr/share/edk2/ovmf"
+
+monitor_cmd() {
+	[[ -S "${monitor}" ]] || { echo "VM is not running" >&2; exit 1; }
+	printf '%s\n' "$1" | socat - "UNIX-CONNECT:${monitor}" >/dev/null
+}
+
+start() {
+	local boot_iso=1 headless=0
+	for arg in "$@"; do
+		case "${arg}" in
+			--disk) boot_iso=0 ;;
+			--headless) headless=1 ;;
+			*) echo "Unknown option: ${arg}" >&2; exit 2 ;;
+		esac
+	done
+
+	mkdir -p "${vm_dir}"
+	[[ -f "${disk}" ]] || qemu-img create -q -f qcow2 "${disk}" 64G
+	[[ -f "${vars}" ]] || cp "${ovmf_dir}/OVMF_VARS.secboot.fd" "${vars}"
+
+	local args=(
+		-name kinetic
+		-machine q35,smm=on,accel=kvm
+		-cpu host -smp 4 -m 8G
+		-global driver=cfi.pflash01,property=secure,value=on
+		-drive "if=pflash,format=raw,unit=0,readonly=on,file=${ovmf_dir}/OVMF_CODE.secboot.fd"
+		-drive "if=pflash,format=raw,unit=1,file=${vars}"
+		-drive "file=${disk},if=virtio,format=qcow2"
+		-nic user,model=virtio-net-pci
+		-device virtio-vga
+		-device qemu-xhci -device usb-tablet
+		-monitor "unix:${monitor},server,nowait"
+		-serial "file:${vm_dir}/serial.log"
+	)
+	if ((boot_iso)); then
+		[[ -f "${KINETIC_ISO}" ]] || { echo "No ISO at ${KINETIC_ISO}; build it first" >&2; exit 1; }
+		args+=(-drive "file=${KINETIC_ISO},media=cdrom,readonly=on" -boot order=d)
+	fi
+	if ((headless)); then
+		args+=(-display none -daemonize -pidfile "${vm_dir}/qemu.pid")
+	else
+		args+=(-display gtk)
+	fi
+
+	qemu-system-x86_64 "${args[@]}"
+}
+
+case "${1:-}" in
+	start) shift; start "$@" ;;
+	screenshot)
+		out="${2:?usage: vm.sh screenshot FILE.png}"
+		ppm="$(mktemp --suffix=.ppm)"
+		monitor_cmd "screendump ${ppm}"
+		sleep 1
+		magick "${ppm}" "${out}"
+		rm -f "${ppm}"
+		;;
+	key) shift; for k in "$@"; do monitor_cmd "sendkey ${k}"; sleep 0.2; done ;;
+	stop) monitor_cmd "quit" ;;
+	reset) rm -f "${disk}" "${vars}"; echo "Virtual disk and firmware settings removed" ;;
+	*) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+esac

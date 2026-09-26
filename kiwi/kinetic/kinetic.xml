@@ -1,0 +1,20 @@
+<image>
+	<profiles>
+		<!--
+		  The name must contain "KDE", "Desktop", and "Live": Fedora's config.sh
+		  matches on those substrings to set up the KDE live session, the
+		  graphical target, and the locked root account.
+		-->
+		<profile name="Kinetic-KDE-Desktop-Live" description="ZypherOS Kinetic live ISO">
+			<requires profile="KDE-Desktop"/>
+			<requires profile="LiveInstall"/>
+		</profile>
+	</profiles>
+	<!-- Milestone 1 baseline: the same packages as Fedora's KDE-Desktop-Live profile -->
+	<packages type="bootstrap" patternType="plusRecommended" profiles="Kinetic-KDE-Desktop-Live">
+		<package name="fedora-release-kde"/>
+	</packages>
+	<packages type="image" patternType="plusRecommended" profiles="Kinetic-KDE-Desktop-Live">
+		<package name="plasma-welcome-fedora"/>
+	</packages>
+</image>
