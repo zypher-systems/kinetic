@@ -7,6 +7,7 @@
 #   ./scripts/vm.sh start --headless   # no window; drive it with screenshot/key
 #   ./scripts/vm.sh screenshot FILE.png
 #   ./scripts/vm.sh key ret            # send keys (QEMU sendkey names, e.g. ctrl-alt-f2)
+#   ./scripts/vm.sh type "some text"   # type text into the VM
 #   ./scripts/vm.sh stop
 #   ./scripts/vm.sh reset              # delete the virtual disk and firmware settings
 set -euo pipefail
@@ -76,7 +77,23 @@ case "${1:-}" in
 		rm -f "${ppm}"
 		;;
 	key) shift; for k in "$@"; do monitor_cmd "sendkey ${k}"; sleep 0.2; done ;;
+	type)
+		text="${2:?usage: vm.sh type TEXT}"
+		for ((i = 0; i < ${#text}; i++)); do
+			c="${text:i:1}"
+			case "${c}" in
+				[a-z0-9]) k="${c}" ;;
+				[A-Z]) k="shift-${c,,}" ;;
+				' ') k="spc" ;; '-') k="minus" ;; '_') k="shift-minus" ;; '.') k="dot" ;;
+				'/') k="slash" ;; ':') k="shift-semicolon" ;; ';') k="semicolon" ;; '|') k="shift-backslash" ;;
+				'=') k="equal" ;; ',') k="comma" ;; "'") k="apostrophe" ;; '"') k="shift-apostrophe" ;;
+				'>') k="shift-dot" ;; '<') k="shift-comma" ;; '&') k="shift-7" ;; '*') k="shift-8" ;;
+				*) echo "vm.sh type: unsupported character '${c}'" >&2; exit 2 ;;
+			esac
+			monitor_cmd "sendkey ${k}"
+		done
+		;;
 	stop) monitor_cmd "quit" ;;
 	reset) rm -f "${disk}" "${vars}"; echo "Virtual disk and firmware settings removed" ;;
-	*) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+	*) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac
