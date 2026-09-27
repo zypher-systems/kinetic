@@ -16,6 +16,7 @@ Source1:        zypheros-mark-small.svg
 Source2:        zypheros-kinetic-lockup-dark.svg
 Source3:        zypheros-kinetic-lockup-light.svg
 Source4:        COPYING
+Source5:        zypheros-app-icon.svg
 
 BuildRequires:  librsvg2-tools
 BuildRequires:  ImageMagick
@@ -30,7 +31,7 @@ the names the installer, boot splash, KDE Plasma, and Cockpit expect.
 
 
 %prep
-cp -p %{SOURCE0} %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} .
+cp -p %{SOURCE0} %{SOURCE1} %{SOURCE2} %{SOURCE3} %{SOURCE4} %{SOURCE5} .
 
 
 %build
@@ -76,9 +77,10 @@ install -Dpm 0644 zypheros-mark.svg ${icons}/scalable/apps/zypheros-logo-icon.sv
 install -Dpm 0644 zypheros-mark.svg ${icons}/scalable/apps/fedora-logo-icon.svg
 install -Dpm 0644 zypheros-mark-small.svg ${icons}/scalable/places/start-here.svg
 install -Dpm 0644 zypheros-mark-small.svg ${icons}/scalable/apps/start-here.svg
-# The live session's "Install to Hard Drive" icon
-install -Dpm 0644 zypheros-mark.svg ${icons}/scalable/apps/org.fedoraproject.AnacondaInstaller.svg
-install -Dpm 0644 zypheros-mark.svg ${icons}/48x48/apps/org.fedoraproject.AnacondaInstaller.svg
+# The live session's "Install to Hard Drive" icon. It needs an opaque tile:
+# the Welcome Center draws the app name behind the icon.
+install -Dpm 0644 zypheros-app-icon.svg ${icons}/scalable/apps/org.fedoraproject.AnacondaInstaller.svg
+install -Dpm 0644 zypheros-app-icon.svg ${icons}/48x48/apps/org.fedoraproject.AnacondaInstaller.svg
 install -Dpm 0644 zypheros-mark-small.svg ${icons}/symbolic/apps/org.fedoraproject.AnacondaInstaller-symbolic.svg
 
 pix=%{buildroot}%{_datadir}/pixmaps
@@ -105,7 +107,7 @@ install -Dpm 0644 out/sidebar-bg.png ${ana}/sidebar-bg.png
 install -Dpm 0644 out/topbar-bg.png ${ana}/topbar-bg.png
 
 install -d %{buildroot}%{_datadir}/zypheros-logos
-install -pm 0644 zypheros-mark.svg zypheros-mark-small.svg zypheros-kinetic-lockup-dark.svg zypheros-kinetic-lockup-light.svg %{buildroot}%{_datadir}/zypheros-logos/
+install -pm 0644 zypheros-mark.svg zypheros-mark-small.svg zypheros-app-icon.svg zypheros-kinetic-lockup-dark.svg zypheros-kinetic-lockup-light.svg %{buildroot}%{_datadir}/zypheros-logos/
 
 
 %files

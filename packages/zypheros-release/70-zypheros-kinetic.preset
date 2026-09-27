@@ -1,0 +1,3 @@
+# ZypherOS Kinetic defaults
+# Docker starts on first use: its socket listens, the daemon waits
+enable docker.socket

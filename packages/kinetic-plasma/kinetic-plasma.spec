@@ -19,8 +19,8 @@ BuildArch:      noarch
 Source0:        zypheros-mark.svg
 Source1:        zypheros-kinetic.jpg
 Source2:        COPYING
-# The Global Theme, /etc/xdg defaults, and login screen settings are read
-# from lnf/, xdg/, and plasmalogin/ next to this spec
+# The Global Theme, /etc/xdg defaults, login screen settings, and new-user
+# shortcuts are read from lnf/, xdg/, plasmalogin/, and skel/ next to this spec
 
 BuildRequires:  ImageMagick
 BuildRequires:  librsvg2-tools
@@ -68,6 +68,10 @@ install -d ${xdg}
 install -pm 0644 %{_sourcedir}/xdg/kdeglobals %{_sourcedir}/xdg/kscreenlockerrc \
 	%{_sourcedir}/xdg/mimeapps.list %{_sourcedir}/xdg/kde-mimeapps.list ${xdg}/
 
+# Ctrl+Alt+T opens Ghostty. KDE's shortcut service only reads each user's
+# own kglobalshortcutsrc, so new users get it from /etc/skel.
+install -Dpm 0644 %{_sourcedir}/skel/kglobalshortcutsrc %{buildroot}%{_sysconfdir}/skel/.config/kglobalshortcutsrc
+
 install -Dpm 0644 %{_sourcedir}/plasmalogin/50-kinetic.conf \
 	%{buildroot}%{_prefix}/lib/plasmalogin/plasmalogin.conf.d/50-kinetic.conf
 
@@ -79,6 +83,8 @@ install -Dpm 0644 %{_sourcedir}/plasmalogin/50-kinetic.conf \
 %config(noreplace) %{_sysconfdir}/xdg/kscreenlockerrc
 %config(noreplace) %{_sysconfdir}/xdg/mimeapps.list
 %config(noreplace) %{_sysconfdir}/xdg/kde-mimeapps.list
+%dir %{_sysconfdir}/skel/.config
+%config(noreplace) %{_sysconfdir}/skel/.config/kglobalshortcutsrc
 %dir %{_prefix}/lib/plasmalogin
 %dir %{_prefix}/lib/plasmalogin/plasmalogin.conf.d
 %{_prefix}/lib/plasmalogin/plasmalogin.conf.d/50-kinetic.conf

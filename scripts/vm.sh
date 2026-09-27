@@ -8,6 +8,7 @@
 #   ./scripts/vm.sh screenshot FILE.png
 #   ./scripts/vm.sh key ret            # send keys (QEMU sendkey names, e.g. ctrl-alt-f2)
 #   ./scripts/vm.sh type "some text"   # type text into the VM
+#   ./scripts/vm.sh click X Y          # click at screen pixel X,Y (as in screenshots)
 #   ./scripts/vm.sh stop
 #   ./scripts/vm.sh reset              # delete the virtual disk and firmware settings
 set -euo pipefail
@@ -18,6 +19,7 @@ vm_dir="${KINETIC_OUT}/vm"
 disk="${vm_dir}/disk.qcow2"
 vars="${vm_dir}/OVMF_VARS.fd"
 monitor="${vm_dir}/monitor.sock"
+qmp="${vm_dir}/qmp.sock"
 ovmf_dir="/usr/share/edk2/ovmf"
 
 monitor_cmd() {
@@ -51,6 +53,7 @@ start() {
 		-device virtio-vga
 		-device qemu-xhci -device usb-tablet
 		-monitor "unix:${monitor},server,nowait"
+		-qmp "unix:${qmp},server,nowait"
 		-serial "file:${vm_dir}/serial.log"
 	)
 	if ((boot_iso)); then
@@ -88,12 +91,49 @@ case "${1:-}" in
 				'/') k="slash" ;; ':') k="shift-semicolon" ;; ';') k="semicolon" ;; '|') k="shift-backslash" ;;
 				'=') k="equal" ;; ',') k="comma" ;; "'") k="apostrophe" ;; '"') k="shift-apostrophe" ;;
 				'>') k="shift-dot" ;; '<') k="shift-comma" ;; '&') k="shift-7" ;; '*') k="shift-8" ;;
+				'[') k="bracket_left" ;; ']') k="bracket_right" ;; '{') k="shift-bracket_left" ;; '}') k="shift-bracket_right" ;;
+				'(') k="shift-9" ;; ')') k="shift-0" ;; '\') k="backslash" ;; '%') k="shift-5" ;; '$') k="shift-4" ;;
+				'#') k="shift-3" ;; '@') k="shift-2" ;; '!') k="shift-1" ;; '+') k="shift-equal" ;; '?') k="shift-slash" ;;
+				'~') k="shift-grave_accent" ;; '`') k="grave_accent" ;; '^') k="shift-6" ;;
 				*) echo "vm.sh type: unsupported character '${c}'" >&2; exit 2 ;;
 			esac
 			monitor_cmd "sendkey ${k}"
+			# A busy guest drops keys typed faster than this
+			sleep 0.04
 		done
+		;;
+	click)
+		x="${2:?usage: vm.sh click X Y}"; y="${3:?usage: vm.sh click X Y}"
+		[[ -S "${qmp}" ]] || { echo "VM is not running" >&2; exit 1; }
+		# Absolute pointer coordinates run 0-32767 across the current screen size
+		ppm="$(mktemp --suffix=.ppm)"
+		monitor_cmd "screendump ${ppm}"
+		sleep 0.5
+		read -r width height < <(identify -format '%w %h\n' "${ppm}")
+		rm -f "${ppm}"
+		python3 - "${qmp}" "${x}" "${y}" "${width}" "${height}" <<'PY'
+import json, socket, sys, time
+path, x, y, w, h = sys.argv[1], *map(int, sys.argv[2:6])
+s = socket.socket(socket.AF_UNIX); s.connect(path); f = s.makefile("rw")
+def cmd(obj):
+    f.write(json.dumps(obj) + "\n"); f.flush()
+    while "return" not in (reply := json.loads(f.readline())) and "error" not in reply:
+        pass
+    return reply
+json.loads(f.readline())
+cmd({"execute": "qmp_capabilities"})
+ax, ay = x * 32767 // (w - 1), y * 32767 // (h - 1)
+cmd({"execute": "input-send-event", "arguments": {"events": [
+    {"type": "abs", "data": {"axis": "x", "value": ax}},
+    {"type": "abs", "data": {"axis": "y", "value": ay}}]}})
+time.sleep(0.1)
+for down in (True, False):
+    cmd({"execute": "input-send-event", "arguments": {"events": [
+        {"type": "btn", "data": {"down": down, "button": "left"}}]}})
+    time.sleep(0.08)
+PY
 		;;
 	stop) monitor_cmd "quit" ;;
 	reset) rm -f "${disk}" "${vars}"; echo "Virtual disk and firmware settings removed" ;;
-	*) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+	*) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <!-- ZypherOS app icon: the circuit-Z mark on a dark rounded tile -->
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="#0B1220"/>
+  <rect x="8.5" y="8.5" width="239" height="239" rx="51.5" fill="none" stroke="#36A9F5" stroke-opacity="0.35"/>
+  <g transform="translate(34 34) scale(0.734)">
+  <defs>
+    <linearGradient id="zg" x1="44" y1="212" x2="212" y2="44" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1459C7"/>
+      <stop offset="1" stop-color="#36A9F5"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke="url(#zg)" stroke-width="9" stroke-linejoin="miter" stroke-miterlimit="10">
+    <!-- Outer outline, two point-symmetric traces joined by vias -->
+    <path d="M92 92 H46.9 L80 44 H212 L129.2 164 H146"/>
+    <path d="M164 164 H209.1 L176 212 H44 L126.8 92 H110"/>
+    <!-- Inner Z trace -->
+    <path d="M92 68 H169.4 L134.8 118.1"/>
+    <path d="M121.2 137.9 L86.6 188 H164"/>
+    <!-- Arrow shafts in the notches -->
+    <path d="M41.4 184 L80.4 127.5"/>
+    <path d="M214.6 72 L175.6 128.5"/>
+    <!-- Short traces -->
+    <path d="M29.2 170 L59.5 126"/>
+    <path d="M226.8 86 L196.5 130"/>
+  </g>
+  <g fill="url(#zg)">
+    <path d="M88.3 116 L86.9 132.1 L73.8 123 Z"/>
+    <path d="M167.7 140 L169.1 123.9 L182.2 133 Z"/>
+  </g>
+  <g fill="none" stroke="url(#zg)" stroke-width="5">
+    <circle cx="155" cy="164" r="7"/>
+    <circle cx="128" cy="128" r="7"/>
+    <circle cx="101" cy="92" r="7"/>
+    <circle cx="84" cy="68" r="7"/>
+    <circle cx="172" cy="188" r="7"/>
+    <circle cx="25.3" cy="175.7" r="7"/>
+    <circle cx="63.4" cy="120.3" r="7"/>
+    <circle cx="230.7" cy="80.3" r="7"/>
+    <circle cx="192.6" cy="135.7" r="7"/>
+  </g>
+
+  </g>
+</svg>

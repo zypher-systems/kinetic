@@ -16,7 +16,9 @@ if [[ "$(findmnt --noheadings --output FSTYPE /)" != btrfs ]]; then
 fi
 
 # Nested subvolumes are left out of snapshots of the root subvolume
-for dir in /var/lib/docker /var/lib/containers /var/lib/libvirt/images; do
+# /var/lib/containers/storage, not its parent: containers-common ships files
+# in /var/lib/containers
+for dir in /var/lib/docker /var/lib/containers/storage /var/lib/libvirt/images; do
 	if btrfs subvolume show "${dir}" >/dev/null 2>&1; then
 		continue
 	fi

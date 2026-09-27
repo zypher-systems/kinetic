@@ -27,6 +27,8 @@ Source6:        81-desktop.preset
 Source7:        20-fedora-defaults.conf
 Source8:        plasma-desktop.conf
 Source9:        zypheros-kinetic.conf
+Source10:       70-zypheros-kinetic.preset
+Source11:       80-zypheros-kinetic.ks
 
 # dnf5 derives $releasever from the package that provides system-release
 Provides:       system-release
@@ -130,6 +132,10 @@ install -Dm0644 %{SOURCE8} -t %{buildroot}%{_sysconfdir}/dnf/protected.d/
 
 # Installer settings, inherited from Fedora KDE's Anaconda profile
 install -Dm0644 %{SOURCE9} -t %{buildroot}%{_sysconfdir}/anaconda/profile.d/
+install -Dm0644 %{SOURCE11} -t %{buildroot}%{_datadir}/anaconda/post-scripts/
+
+# Kinetic's own service defaults
+install -Dm0644 %{SOURCE10} -t %{buildroot}%{_prefix}/lib/systemd/system-preset/
 
 install -d licenses
 install -pm 0644 %{SOURCE0} licenses/LICENSE
@@ -152,6 +158,7 @@ install -pm 0644 %{SOURCE0} licenses/LICENSE
 %dir %{_sysconfdir}/issue.d
 %attr(0644,root,root) %{_rpmconfigdir}/macros.d/macros.dist
 %dir %{_prefix}/lib/systemd/system-preset/
+%{_prefix}/lib/systemd/system-preset/70-zypheros-kinetic.preset
 %{_prefix}/lib/systemd/system-preset/80-kde-desktop.preset
 %{_prefix}/lib/systemd/system-preset/81-desktop.preset
 %{_prefix}/lib/systemd/system-preset/85-display-manager.preset
@@ -165,6 +172,9 @@ install -pm 0644 %{SOURCE0} licenses/LICENSE
 %dir %{_sysconfdir}/anaconda
 %dir %{_sysconfdir}/anaconda/profile.d
 %{_sysconfdir}/anaconda/profile.d/zypheros-kinetic.conf
+%dir %{_datadir}/anaconda
+%dir %{_datadir}/anaconda/post-scripts
+%{_datadir}/anaconda/post-scripts/80-zypheros-kinetic.ks
 
 
 %changelog

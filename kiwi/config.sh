@@ -17,7 +17,13 @@ echo "Configure Kinetic: [$kiwi_iname]-[$kiwi_profiles]..."
 #--------------------------------------
 ## Users created by Plasma Setup on first boot join docker and libvirt
 sed -i -e 's/^UserGroups=.*/UserGroups=wheel,docker,libvirt/' /etc/xdg/plasmasetuprc
-## Start Docker on first use rather than at every boot
-systemctl enable docker.socket
+
+#======================================
+# Boot loader environment
+#--------------------------------------
+## grub2-mkconfig records blsdir when /boot/loader/entries is on btrfs, and
+## on a btrfs build host that is the host path of this image root. Left in
+## place, installed systems boot to an empty GRUB menu.
+grub2-editenv - unset blsdir
 
 exit 0

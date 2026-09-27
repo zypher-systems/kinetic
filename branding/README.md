@@ -6,6 +6,7 @@ Source artwork for ZypherOS Kinetic. Packages under `packages/` render these int
 | --- | --- |
 | `logo/zypheros-mark.svg` | Full circuit-Z mark: boot splash, installer, About page, 48 px and up |
 | `logo/zypheros-mark-small.svg` | Simplified mark for small sizes: panel launcher, tray, 16–32 px |
+| `logo/zypheros-app-icon.svg` | The mark on a dark rounded tile, for app icons such as the installer |
 | `logo/zypheros-kinetic-lockup-dark.svg` | Mark and "ZYPHEROS / KINETIC" wordmark for dark backgrounds |
 | `logo/zypheros-kinetic-lockup-light.svg` | The same for light backgrounds |
 | `wallpapers/zypheros-kinetic.jpg` | Default wallpaper (5504×3072) |

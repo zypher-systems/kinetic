@@ -50,56 +50,59 @@ set -g fish_pager_color_description B3A06D yellow
 set -g fish_pager_color_prefix white --bold --underline
 set -g fish_pager_color_progress brwhite --background=cyan
 
-# ===== ALIASES =====
+# ===== ABBREVIATIONS =====
+# Abbreviations expand as you type. Unlike aliases (which fish implements as
+# functions), they never change how scripts and fish's own functions run
+# commands like cat, less, grep, or mkdir.
 # Listing (colors only when writing to a terminal, so pipes stay clean)
-alias ls 'eza --color=auto --group-directories-first --icons=auto'
-alias ll 'eza -alF --color=auto --group-directories-first --icons=auto'
-alias la 'eza -a --color=auto --group-directories-first --icons=auto'
-alias lt 'eza -aT --color=auto --group-directories-first --icons=auto'
-alias l. 'eza -a | grep -E "^\."'
+abbr --add ls 'eza --color=auto --group-directories-first --icons=auto'
+abbr --add ll 'eza -alF --color=auto --group-directories-first --icons=auto'
+abbr --add la 'eza -a --color=auto --group-directories-first --icons=auto'
+abbr --add lt 'eza -aT --color=auto --group-directories-first --icons=auto'
+abbr --add l. 'eza -a | grep -E "^\."'
 
 # Git
-alias g 'git'
-alias gs 'git status -sb'
-alias gl 'git log --oneline --graph --decorate --all'
-alias ga 'git add'
-alias gc 'git commit'
-alias gp 'git push'
-alias gd 'git diff --color=always'
+abbr --add g 'git'
+abbr --add gs 'git status -sb'
+abbr --add gl 'git log --oneline --graph --decorate --all'
+abbr --add ga 'git add'
+abbr --add gc 'git commit'
+abbr --add gp 'git push'
+abbr --add gd 'git diff --color=always'
 
 # System information
-alias sysinfo 'fastfetch'
-alias myip 'curl -s ifconfig.me'
-alias ports 'ss -tuln'
+abbr --add sysinfo 'fastfetch'
+abbr --add myip 'curl -s ifconfig.me'
+abbr --add ports 'ss -tuln'
 
 # Viewing
-alias cat 'bat --style=numbers,changes,header'
-alias less 'bat --paging=always'
+abbr --add cat 'bat --style=numbers,changes,header'
+abbr --add less 'bat --paging=always'
 
 # Navigation
-alias .. 'cd ..'
-alias ... 'cd ../..'
-alias .... 'cd ../../..'
+abbr --add .. 'cd ..'
+abbr --add ... 'cd ../..'
+abbr --add .... 'cd ../../..'
 
 # Monitoring and sizes
-alias htop 'btop'
-alias df 'df -h'
-alias du 'du -h'
-alias free 'free -h'
+abbr --add htop 'btop'
+abbr --add df 'df -h'
+abbr --add du 'du -h'
+abbr --add free 'free -h'
 
 # Misc
-alias grep 'grep --color=auto'
-alias mkdir 'mkdir -pv'
-alias wget 'wget -c'
-alias userlist 'cut -d: -f1 /etc/passwd'
-alias fsize 'du -sh'
-alias reload 'source ~/.config/fish/config.fish'
+abbr --add grep 'grep --color=auto'
+abbr --add mkdir 'mkdir -pv'
+abbr --add wget 'wget -c'
+abbr --add userlist 'cut -d: -f1 /etc/passwd'
+abbr --add fsize 'du -sh'
+abbr --add reload 'source ~/.config/fish/config.fish'
 
 # List the new directory after every directory change, without replacing
 # cd, so "cd -" and fish's directory history keep working
 function __kinetic_ls_after_cd --on-variable PWD
     status is-command-substitution; and return
-    ls
+    eza --color=auto --group-directories-first --icons=auto
 end
 
 # ===== PROMPT AND TOOLS =====
