@@ -1,0 +1,56 @@
+#!/usr/bin/bash
+# Repair the boot menu after a snapshot restore. /boot is its own partition,
+# so restoring a snapshot of the system doesn't restore it: after rolling back
+# an update that installed a kernel, GRUB's default is still that kernel, but
+# its modules are gone from the restored system, and it drops into emergency
+# mode (it can't even mount the EFI partition).
+#
+# Runs early at boot, only when the running kernel's modules are missing
+# (kinetic-boot-repair.service). Makes GRUB's default the newest kernel that is
+# installed in this system and removes boot entries for kernels that aren't;
+# the unit then restarts the computer. Only files on /boot are changed.
+set -euo pipefail
+
+entries=/boot/loader/entries
+
+say() { echo "ZypherOS: $*"; }
+
+declare -A entry_of
+installed=()
+missing=()
+for conf in "${entries}"/*.conf; do
+	[[ -e "${conf}" ]] || continue
+	# The rescue entry carries its own kernel and drivers; always keep it
+	[[ "${conf}" == *-0-rescue.conf ]] && continue
+	version="$(awk '$1 == "version" { print $2; exit }' "${conf}")"
+	[[ -n "${version}" ]] || continue
+	if [[ -d "/usr/lib/modules/${version}/kernel" ]]; then
+		installed+=("${version}")
+		entry_of["${version}"]="$(basename "${conf}" .conf)"
+	else
+		missing+=("${version}")
+	fi
+done
+
+if ((${#installed[@]} == 0)); then
+	say "No boot entry matches a kernel installed in this system; leaving the boot menu unchanged."
+	exit 1
+fi
+
+newest="$(printf '%s\n' "${installed[@]}" | sort -V | tail -n 1)"
+entry="${entry_of[${newest}]}"
+
+say "Kernel $(uname -r) is not installed in this system, likely after restoring a snapshot."
+
+for version in "${missing[@]}"; do
+	say "Removing the boot entry for ${version}."
+	rm -f "${entries}"/*"-${version}.conf" \
+		"/boot/vmlinuz-${version}" "/boot/.vmlinuz-${version}.hmac" \
+		"/boot/initramfs-${version}.img" "/boot/System.map-${version}" \
+		"/boot/config-${version}" "/boot/symvers-${version}.xz"
+done
+
+say "Making ${newest} the default kernel and restarting."
+grub2-editenv - set "saved_entry=${entry}"
+# Success restarts the computer (SuccessAction=reboot in the unit). The broken
+# entries are gone, so the next boot can't come back here.

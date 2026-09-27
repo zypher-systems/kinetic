@@ -1,8 +1,9 @@
 # ZypherOS Kinetic: snapper snapshots before and after every dnf transaction.
 # From the libdnf5-actions(8) manual, which emulates the DNF4 snapper plugin.
 
-# Saves the command line that started the transaction as the description
-pre_transaction::::/usr/bin/sh -c echo\ "tmp.snapper_descr=$(ps\ -o\ command\ --no-headers\ -p\ '${pid}')"
+# Saves the command line that started the transaction as the description.
+# Updates from Discover run in PackageKit's daemon; say so instead.
+pre_transaction::::/usr/bin/sh -c echo\ "tmp.snapper_descr=$(ps\ -o\ command\ --no-headers\ -p\ '${pid}'\ |\ sed\ 's|^/usr/libexec/packagekitd.*|Discover\ (PackageKit)|')"
 
 # Creates the pre snapshot and remembers its number
 pre_transaction::::/usr/bin/sh -c echo\ "tmp.snapper_pre_number=$(snapper\ create\ -t\ pre\ -p\ -d\ '${tmp.snapper_descr}')"

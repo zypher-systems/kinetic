@@ -1,0 +1,20 @@
+[Unit]
+Description=Repair the boot menu after a snapshot restore
+Documentation=https://github.com/zypher-systems/kinetic/blob/main/docs/recovery.md
+# Only when the running kernel's modules are missing, as after restoring a
+# snapshot from before a kernel update. Runs early and survives the switch to
+# emergency mode that such a boot ends in.
+ConditionPathExists=!/usr/lib/modules/%v
+ConditionKernelCommandLine=!rd.live.image
+DefaultDependencies=no
+RequiresMountsFor=/boot
+IgnoreOnIsolate=yes
+# Restart into the repaired default. A reboot requested from inside the
+# service would conflict with this unit's own start job.
+SuccessAction=reboot
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/kinetic/boot-repair
+StandardOutput=journal+console
+StandardError=journal+console

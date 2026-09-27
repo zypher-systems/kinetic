@@ -63,7 +63,8 @@ systemctl enable --now snapper-cleanup.timer
 
 # Docker starts on first use. Live installs keep the image's unit states, and
 # docker-ce doesn't apply presets to its socket, so enable it here, once.
-# --no-block: this unit is ordered before docker.socket.
+# --no-block: this unit is ordered before docker.service, which the socket
+# starts.
 if systemctl cat docker.socket >/dev/null 2>&1; then
 	systemctl enable docker.socket
 	systemctl start --no-block docker.socket

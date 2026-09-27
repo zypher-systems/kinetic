@@ -5,8 +5,11 @@ Documentation=https://github.com/zypher-systems/kinetic
 ConditionKernelCommandLine=!rd.live.image
 ConditionPathExists=!/var/lib/kinetic/snapshots-setup.done
 After=local-fs.target
-# Container and VM storage must become subvolumes before first use
-Before=docker.service docker.socket containerd.service podman.service podman.socket libvirtd.service virtqemud.service kinetic-firstboot-apps.service
+# Container and VM storage must become subvolumes before first use. Order
+# against the services, not their sockets: sockets start before basic.target,
+# which this unit comes after, so ordering it before a socket is a cycle that
+# systemd breaks by not starting the socket.
+Before=docker.service containerd.service podman.service libvirtd.service virtqemud.service kinetic-firstboot-apps.service
 
 [Service]
 Type=oneshot
