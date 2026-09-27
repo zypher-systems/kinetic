@@ -1,9 +1,10 @@
 #!/usr/bin/bash
-# Set up btrfs snapshots on the first boot of an installed ZypherOS Kinetic
-# system: separate subvolumes for container and VM storage, so rolling back
-# the OS never touches them, and a snapper configuration for the root
-# filesystem with a baseline snapshot. dnf then snapshots before and after
-# every transaction (/etc/dnf/libdnf5-plugins/actions.d/snapper.actions).
+# Set up btrfs snapshots and container storage on the first boot of an
+# installed ZypherOS Kinetic system: separate subvolumes for container and VM
+# storage, so rolling back the OS never touches them; a snapper configuration
+# for the root filesystem with a baseline snapshot; and Docker's socket. dnf
+# then snapshots before and after every transaction
+# (/etc/dnf/libdnf5-plugins/actions.d/snapper.actions).
 set -euo pipefail
 
 stamp=/var/lib/kinetic/snapshots-setup.done
@@ -23,13 +24,15 @@ for dir in /var/lib/docker /var/lib/containers/storage /var/lib/libvirt/images; 
 		continue
 	fi
 	if [[ -d "${dir}" ]]; then
-		if [[ -n "$(ls -A "${dir}")" ]]; then
+		# Only empty directories (such as ones systemd-tmpfiles created at
+		# boot) may be replaced; any file means real data
+		if [[ -n "$(find "${dir}" -mindepth 1 ! -type d -print -quit)" ]]; then
 			echo "Leaving ${dir} as a directory: it already has data."
 			continue
 		fi
 		mode="$(stat -c %a "${dir}")"
 		owner="$(stat -c %u:%g "${dir}")"
-		rmdir "${dir}"
+		find "${dir}" -depth -type d -delete
 	else
 		mode=711
 		owner=0:0
@@ -41,6 +44,9 @@ for dir in /var/lib/docker /var/lib/containers/storage /var/lib/libvirt/images; 
 	restorecon "${dir}"
 	echo "Created subvolume ${dir}"
 done
+
+# Recreate the standard directories systemd-tmpfiles puts in them
+systemd-tmpfiles --create --prefix=/var/lib/docker --prefix=/var/lib/containers --prefix=/var/lib/libvirt
 
 if ! snapper -c root get-config >/dev/null 2>&1; then
 	snapper -c root create-config /
@@ -55,5 +61,13 @@ fi
 snapper -c root create --description "ZypherOS Kinetic first boot" --userdata important=yes
 systemctl enable --now snapper-cleanup.timer
 
+# Docker starts on first use. Live installs keep the image's unit states, and
+# docker-ce doesn't apply presets to its socket, so enable it here, once.
+# --no-block: this unit is ordered before docker.socket.
+if systemctl cat docker.socket >/dev/null 2>&1; then
+	systemctl enable docker.socket
+	systemctl start --no-block docker.socket
+fi
+
 touch "${stamp}"
-echo "Snapshots are set up."
+echo "Snapshots and container storage are set up."

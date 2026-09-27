@@ -1,5 +1,5 @@
 [Unit]
-Description=Set up btrfs snapshots for ZypherOS Kinetic
+Description=Set up btrfs snapshots and container storage for ZypherOS Kinetic
 Documentation=https://github.com/zypher-systems/kinetic
 # Installed systems only, once
 ConditionKernelCommandLine=!rd.live.image

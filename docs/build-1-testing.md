@@ -25,8 +25,19 @@ Found and fixed for the next build:
 | fish prints "mkdir: created directory" | Aliases are functions in fish, so `mkdir -pv` also applied inside fish itself | Aliases became abbreviations |
 | Installer icon has text showing through | The Welcome Center draws the app name behind the icon | Installer icon is the Z on an opaque tile |
 
+## Second install (ISO of 2026-09-27, afternoon)
+
+Confirmed fixed: the installed system boots straight into ZypherOS (GRUB environment has no `blsdir`); Ctrl+Alt+T opens Ghostty for a new user; fish prints nothing extra; the installer icon is an opaque tile.
+
+Still broken, fixed for the next build:
+
+| Problem | Cause | Fix |
+| --- | --- | --- |
+| `docker.socket` still disabled | Live installs keep the image's unit states, and the installer assigns a machine ID, so systemd never applies presets on first boot; docker-ce doesn't apply presets to its socket either | `kinetic-snapshots-setup` enables and starts `docker.socket` on first boot. Verified by hand in the VM: `docker run hello-world` works for a `docker` group member |
+| `/var/lib/containers/storage` not a subvolume | `systemd-tmpfiles` creates an empty `tmp` inside it at boot | Directories holding only empty directories count as empty; `systemd-tmpfiles` recreates them inside the new subvolume |
+
 ## Polish backlog
 
 - Plasma Setup's background is Fedora's F44 wallpaper, not ZypherOS's
-- The installer's "Send us feedback" link points to Fedora's Anaconda forum
-- The Plymouth boot splash with the ZypherOS watermark has not been captured on screen yet
+- The installer's "Send us feedback" link points to Fedora's Anaconda forum; it is built into anaconda-webui, not configurable
+- The Plymouth boot splash with the ZypherOS watermark has not been captured on screen yet (the VM boots too fast)
