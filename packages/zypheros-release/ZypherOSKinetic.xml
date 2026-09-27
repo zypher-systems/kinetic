@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<zone>
+  <short>ZypherOS Kinetic</short>
+  <description>The default zone on ZypherOS Kinetic. Incoming connections are refused, except replies to connections this computer made and these services: SSH (sshd is off unless you enable it), mDNS, DHCPv6, printer discovery, Windows share browsing, and KDE Connect. To reach a dev server from another device, open its port, for example: sudo firewall-cmd --add-port=8080/tcp</description>
+  <service name="ssh"/>
+  <service name="mdns"/>
+  <service name="dhcpv6-client"/>
+  <service name="ipp-client"/>
+  <service name="samba-client"/>
+  <service name="kdeconnect"/>
+  <forward/>
+</zone>

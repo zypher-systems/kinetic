@@ -5,13 +5,13 @@
 # dnf defaults, and dnf protected list are Fedora's, unchanged.
 
 %global dist_version    44
-%global kinetic_version 0.1.0
+%global kinetic_version 0.2.0
 # Fedora Linux 44 end of life; ZypherOS Kinetic tracks its base
 %global eol_date        2027-05-19
 
 Name:           zypheros-release
 Version:        %{dist_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        ZypherOS Kinetic release files
 License:        MIT
 URL:            https://github.com/zypher-systems/kinetic
@@ -29,6 +29,8 @@ Source8:        plasma-desktop.conf
 Source9:        zypheros-kinetic.conf
 Source10:       70-zypheros-kinetic.preset
 Source11:       80-zypheros-kinetic.ks
+Source12:       ZypherOSKinetic.xml
+Source13:       daemon.json
 
 # dnf5 derives $releasever from the package that provides system-release
 Provides:       system-release
@@ -47,8 +49,8 @@ Conflicts:      generic-release-common
 %description
 Release files that identify the system as ZypherOS Kinetic, the desktop
 edition of ZypherOS, based on Fedora Linux %{dist_version}: os-release, issue,
-rpm dist macros, Fedora's systemd presets for KDE Plasma desktops, and the
-installer profile.
+rpm dist macros, Fedora's systemd presets for KDE Plasma desktops, the
+installer profile, and Kinetic's firewall zone and Docker defaults.
 
 
 %prep
@@ -137,8 +139,33 @@ install -Dm0644 %{SOURCE11} -t %{buildroot}%{_datadir}/anaconda/post-scripts/
 # Kinetic's own service defaults
 install -Dm0644 %{SOURCE10} -t %{buildroot}%{_prefix}/lib/systemd/system-preset/
 
+# Kinetic's firewall zone, made the default when firewalld is installed
+install -Dm0644 %{SOURCE12} -t %{buildroot}%{_prefix}/lib/firewalld/zones/
+
+# Docker: published ports listen on localhost unless an address is given
+install -Dm0644 %{SOURCE13} -t %{buildroot}%{_sysconfdir}/docker/
+
 install -d licenses
 install -pm 0644 %{SOURCE0} licenses/LICENSE
+
+
+# Make Kinetic's zone firewalld's default, once. firewalld links
+# firewalld.conf to its "standard" or "workstation" defaults; setting the
+# zone replaces that link with a file, so a firewall an administrator has
+# configured is never touched. On a new install this runs before firewalld's
+# own %%posttrans creates the link, so create it here first.
+%triggerin -- firewalld
+conf=%{_sysconfdir}/firewalld/firewalld.conf
+[ -e "${conf}" ] || [ -L "${conf}" ] || ln -s firewalld-standard.conf "${conf}"
+case "$(readlink "${conf}")" in
+firewalld-standard.conf|firewalld-workstation.conf)
+	if firewall-cmd --state >/dev/null 2>&1; then
+		firewall-cmd --reload >/dev/null && firewall-cmd --set-default-zone=ZypherOSKinetic >/dev/null || :
+	else
+		firewall-offline-cmd --set-default-zone=ZypherOSKinetic >/dev/null || :
+	fi
+	;;
+esac
 
 
 %files
@@ -175,8 +202,18 @@ install -pm 0644 %{SOURCE0} licenses/LICENSE
 %dir %{_datadir}/anaconda
 %dir %{_datadir}/anaconda/post-scripts
 %{_datadir}/anaconda/post-scripts/80-zypheros-kinetic.ks
+%dir %{_prefix}/lib/firewalld
+%dir %{_prefix}/lib/firewalld/zones
+%{_prefix}/lib/firewalld/zones/ZypherOSKinetic.xml
+%dir %{_sysconfdir}/docker
+%config(noreplace) %{_sysconfdir}/docker/daemon.json
 
 
 %changelog
+* Sun Sep 27 2026 Zypher Systems <zypher@zyphersystems.com> - 44-2
+- ZypherOS Kinetic 0.2.0
+- Add Kinetic's firewall zone and make it the default
+- Docker publishes ports on localhost unless an address is given
+
 * Sat Sep 26 2026 Zypher Systems <zypher@zyphersystems.com> - 44-1
 - Initial ZypherOS Kinetic 0.1.0 release package, from fedora-release 44-18
