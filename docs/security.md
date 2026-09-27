@@ -65,7 +65,36 @@ Encryption protects a machine that is off. A laptop that is lost or stolen while
 
 ### Unlocking with the TPM
 
-<!-- Filled in once tested in the VM and on the Z16 -->
+Instead of the passphrase, the disk can be unlocked by the computer's TPM, which only releases the key when the machine starts with Secure Boot in the same state. This is opt-in. Choose one:
+
+- **TPM + PIN (recommended):** at boot you type a short PIN instead of the passphrase. The TPM limits how many wrong PINs it accepts, so a short PIN is safe, and a stolen laptop still can't be unlocked without it.
+- **TPM only:** the disk unlocks by itself and the computer boots straight to the login screen. The drive is useless on its own, but anyone holding the laptop gets as far as your login screen, and the data is only as safe as that.
+
+First find the encrypted partition (the one whose `FSTYPE` is `crypto_LUKS`):
+
+```bash
+lsblk -o NAME,FSTYPE,MOUNTPOINTS
+```
+
+Then, replacing `/dev/nvme0n1p3` with that partition:
+
+```bash
+# Add a recovery key and keep it somewhere safe (a password manager, or on paper).
+# Once you only type a PIN, it's easy to forget the passphrase; the recovery key
+# works wherever the passphrase does.
+sudo systemd-cryptenroll --recovery-key /dev/nvme0n1p3
+
+# Enroll the TPM, bound to the Secure Boot state (PCR 7). Drop --tpm2-with-pin=yes for TPM only.
+sudo systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=7 --tpm2-with-pin=yes /dev/nvme0n1p3
+
+# Use the TPM at boot, and rebuild the boot image with TPM support
+sudo sed -i '/^luks-/ s/$/,tpm2-device=auto/' /etc/crypttab
+sudo dracut -f
+```
+
+`sudo systemd-cryptenroll /dev/nvme0n1p3` lists what can unlock the disk: your passphrase, the recovery key, and the TPM. Your passphrase keeps working, at the boot prompt and from the Kinetic USB stick.
+
+If the Secure Boot state changes (Secure Boot turned off, or a firmware or Secure Boot database update), the TPM refuses and the boot asks for the passphrase instead. Enroll the TPM again with the same command plus `--wipe-slot=tpm2`. To stop using the TPM: `sudo systemd-cryptenroll --wipe-slot=tpm2 /dev/nvme0n1p3`, remove `,tpm2-device=auto` from `/etc/crypttab`, and run `sudo dracut -f`.
 
 ## What's off until you turn it on
 
