@@ -5,12 +5,19 @@
 #   ./scripts/vm.sh start              # boot the ISO in a window; install to the virtual disk from there
 #   ./scripts/vm.sh start --disk       # boot the installed virtual disk
 #   ./scripts/vm.sh start --headless   # no window; drive it with screenshot/key
+#   ./scripts/vm.sh start --tpm        # add a TPM 2.0 (swtpm), for disk unlock tests
+#   ./scripts/vm.sh start --iso FILE   # boot another ISO than this version's
+#   ./scripts/vm.sh ssh [COMMAND]      # ssh in as the VM's user (KINETIC_VM_USER, default "tester")
 #   ./scripts/vm.sh screenshot FILE.png
 #   ./scripts/vm.sh key ret            # send keys (QEMU sendkey names, e.g. ctrl-alt-f2)
 #   ./scripts/vm.sh type "some text"   # type text into the VM
 #   ./scripts/vm.sh click X Y          # click at screen pixel X,Y (as in screenshots)
 #   ./scripts/vm.sh stop
-#   ./scripts/vm.sh reset              # delete the virtual disk and firmware settings
+#   ./scripts/vm.sh reset              # delete the virtual disk, firmware settings, and TPM
+#
+# The VM's SSH port is forwarded to 127.0.0.1:22022 (KINETIC_VM_SSH_PORT) only. To
+# use "vm.sh ssh", enable sshd in the VM and add out/vm/ssh_key.pub to the
+# user's ~/.ssh/authorized_keys ("vm.sh ssh" prints how).
 set -euo pipefail
 
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
@@ -20,6 +27,11 @@ disk="${vm_dir}/disk.qcow2"
 vars="${vm_dir}/OVMF_VARS.fd"
 monitor="${vm_dir}/monitor.sock"
 qmp="${vm_dir}/qmp.sock"
+tpm_dir="${vm_dir}/tpm"
+ssh_key="${vm_dir}/ssh_key"
+ssh_port="${KINETIC_VM_SSH_PORT:-22022}"
+ssh_opts=(-q -i "${ssh_key}" -p "${ssh_port}" -l "${KINETIC_VM_USER:-tester}"
+	-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null)
 ovmf_dir="/usr/share/edk2/ovmf"
 
 monitor_cmd() {
@@ -28,13 +40,16 @@ monitor_cmd() {
 }
 
 start() {
-	local boot_iso=1 headless=0
-	for arg in "$@"; do
-		case "${arg}" in
+	local boot_iso=1 headless=0 tpm=0 iso="${KINETIC_ISO}"
+	while (($#)); do
+		case "$1" in
 			--disk) boot_iso=0 ;;
 			--headless) headless=1 ;;
-			*) echo "Unknown option: ${arg}" >&2; exit 2 ;;
+			--tpm) tpm=1 ;;
+			--iso) iso="${2:?--iso needs a file}"; shift ;;
+			*) echo "Unknown option: $1" >&2; exit 2 ;;
 		esac
+		shift
 	done
 
 	mkdir -p "${vm_dir}"
@@ -49,7 +64,7 @@ start() {
 		-drive "if=pflash,format=raw,unit=0,readonly=on,file=${ovmf_dir}/OVMF_CODE.secboot.fd"
 		-drive "if=pflash,format=raw,unit=1,file=${vars}"
 		-drive "file=${disk},if=virtio,format=qcow2"
-		-nic user,model=virtio-net-pci
+		-nic "user,model=virtio-net-pci,hostfwd=tcp:127.0.0.1:${ssh_port}-:22"
 		-device virtio-vga
 		-device qemu-xhci -device usb-tablet
 		-monitor "unix:${monitor},server,nowait"
@@ -57,8 +72,17 @@ start() {
 		-serial "file:${vm_dir}/serial.log"
 	)
 	if ((boot_iso)); then
-		[[ -f "${KINETIC_ISO}" ]] || { echo "No ISO at ${KINETIC_ISO}; build it first" >&2; exit 1; }
-		args+=(-drive "file=${KINETIC_ISO},media=cdrom,readonly=on" -boot order=d)
+		[[ -f "${iso}" ]] || { echo "No ISO at ${iso}; build it first" >&2; exit 1; }
+		args+=(-drive "file=${iso},media=cdrom,readonly=on" -boot order=d)
+	fi
+	if ((tpm)); then
+		# The TPM's state persists in out/vm/tpm, like the disk
+		mkdir -p "${tpm_dir}"
+		swtpm socket --tpm2 --daemon --terminate \
+			--tpmstate "dir=${tpm_dir}" \
+			--ctrl "type=unixio,path=${tpm_dir}/swtpm.sock"
+		args+=(-chardev "socket,id=chrtpm,path=${tpm_dir}/swtpm.sock"
+			-tpmdev emulator,id=tpm0,chardev=chrtpm -device tpm-crb,tpmdev=tpm0)
 	fi
 	if ((headless)); then
 		args+=(-display none -daemonize -pidfile "${vm_dir}/qemu.pid")
@@ -133,7 +157,18 @@ for down in (True, False):
     time.sleep(0.08)
 PY
 		;;
+	ssh)
+		shift
+		[[ -f "${ssh_key}" ]] || ssh-keygen -q -t ed25519 -N "" -C kinetic-vm-test -f "${ssh_key}"
+		if ! ssh -n "${ssh_opts[@]}" -o BatchMode=yes -o ConnectTimeout=5 localhost true 2>/dev/null; then
+			echo "Can't log in to the VM over SSH yet. In the VM, run:" >&2
+			echo "  sudo systemctl enable --now sshd" >&2
+			echo "  mkdir -p ~/.ssh && echo '$(cat "${ssh_key}.pub")' >> ~/.ssh/authorized_keys" >&2
+			exit 1
+		fi
+		exec ssh "${ssh_opts[@]}" localhost "$@"
+		;;
 	stop) monitor_cmd "quit" ;;
-	reset) rm -f "${disk}" "${vars}"; echo "Virtual disk and firmware settings removed" ;;
-	*) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+	reset) rm -rf "${disk}" "${vars}" "${tpm_dir}"; echo "Virtual disk, firmware settings, and TPM removed" ;;
+	*) awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"; exit 2 ;;
 esac
