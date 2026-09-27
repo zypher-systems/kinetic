@@ -36,6 +36,12 @@ Still broken, fixed for the next build:
 | `docker.socket` still disabled | Live installs keep the image's unit states, and the installer assigns a machine ID, so systemd never applies presets on first boot; docker-ce doesn't apply presets to its socket either | `kinetic-snapshots-setup` enables and starts `docker.socket` on first boot. Verified by hand in the VM: `docker run hello-world` works for a `docker` group member |
 | `/var/lib/containers/storage` not a subvolume | `systemd-tmpfiles` creates an empty `tmp` inside it at boot | Directories holding only empty directories count as empty; `systemd-tmpfiles` recreates them inside the new subvolume |
 
+## Third install (ISO of 2026-09-27, 11:17)
+
+Everything in the build 1 spec passed, with nothing done by hand: boots straight into ZypherOS; Plasma Setup user in `wheel`, `docker`, and `libvirt`; Ctrl+Alt+T opens Ghostty with fish; `docker.socket` enabled and active, and `docker run hello-world` works for the user; `var/lib/docker`, `var/lib/containers/storage`, and `var/lib/libvirt/images` are subvolumes; baseline and dnf pre/post snapshots exist; Cursor, Grok Bot, Flatseal, and Gear Lever installed on first boot.
+
+Next: real hardware (Ryzen 9 9950X, Radeon RX 9070 XT, ASUS ProArt X870E-Creator WiFi), especially Wi-Fi 7 and Bluetooth on the MT7927.
+
 ## Polish backlog
 
 - Plasma Setup's background is Fedora's F44 wallpaper, not ZypherOS's

@@ -2,7 +2,7 @@
 
 Kinetic is the desktop edition of **ZypherOS**, an agentic Linux distribution from Zypher Systems, based on Fedora Linux 44 with KDE Plasma.
 
-> **Status:** early planning. There is no image to install yet.
+> **Status:** 0.1.0 in testing. The ISO builds and installs cleanly in a VM ([test log](docs/build-1-testing.md)); no ISO is published yet, so build it yourself (below).
 
 ## What it is
 
