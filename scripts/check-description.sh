@@ -32,20 +32,21 @@ podman run --rm \
 
 cp "${check_dir}/packages.txt" "${KINETIC_OUT}/packages.txt"
 
-# Build 1 must include these...
+# The image must include these...
 required=(
 	zypheros-release zypheros-logos kinetic-repos kinetic-backgrounds kinetic-plasma
 	kinetic-shell kinetic-agents kinetic-snapshots plasma-desktop plasma-login-manager
 	anaconda-live chromium ghostty codium docker-ce podman distrobox virt-manager
 	qemu-kvm fish starship ffmpeg mesa-va-drivers-freeworld libreoffice-writer gimp
 	inkscape blender obs-studio tailscale syncthing snapper btrfs-assistant
-	webkit2gtk4.1-devel rustup
+	webkit2gtk4.1-devel rustup firewalld jetbrains-mono-fonts
 )
 # ...and must not include these
 excluded=(
 	firefox kmail kontact korganizer akregator kaddressbook akonadi-server abrt
 	abrt-cli abrt-desktop kpat kmines kmahjongg mediawriter plasma-welcome-fedora
 	fedora-release-common fedora-logos ffmpeg-free libavcodec-free mesa-va-drivers
+	desktop-backgrounds-kde
 )
 
 status=0

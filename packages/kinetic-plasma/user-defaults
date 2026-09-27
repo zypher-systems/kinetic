@@ -1,0 +1,66 @@
+#!/usr/bin/bash
+# Apply ZypherOS Kinetic's per-user defaults to this account, at login before
+# Plasma's services start (from /etc/xdg/plasma-workspace/env). KDE's shortcut
+# service only reads each user's own kglobalshortcutsrc, so new default
+# shortcuts can't come from /etc/xdg like other settings do.
+#
+# A setting is only changed while it still has its previous default, so
+# anything the user has set themselves is left alone. Each step runs once per
+# account; the record is in ~/.local/state/kinetic.
+set -u
+
+# System accounts, such as Plasma Setup's, keep KDE's defaults
+(($(id -u) >= 1000)) || exit 0
+
+config="${XDG_CONFIG_HOME:-${HOME}/.config}"
+state="${XDG_STATE_HOME:-${HOME}/.local/state}/kinetic"
+mkdir -p "${config}" "${state}" || exit 0
+
+tab=$'\t'
+
+# set_shortcut GROUP... -- VALUE PREVIOUS...
+# Sets the shortcut when it is unset or equal to one of the PREVIOUS values.
+set_shortcut() {
+	local groups=() current previous
+	while [[ "$1" != -- ]]; do groups+=(--group "$1"); shift; done
+	shift
+	local key="$1" value="$2"
+	shift 2
+	current="$(kreadconfig6 --file "${config}/kglobalshortcutsrc" "${groups[@]}" --key "${key}")"
+	for previous in "" "$@"; do
+		if [[ "${current}" == "${previous}" ]]; then
+			kwriteconfig6 --file "${config}/kglobalshortcutsrc" "${groups[@]}" --key "${key}" "${value}"
+			return
+		fi
+	done
+}
+
+# 0.2.0: keyboard shortcuts
+if [[ ! -e "${state}/shortcuts-0.2.0" ]]; then
+	# Ghostty: Ctrl+Alt+T and Meta+Return. Konsole gives up Ctrl+Alt+T.
+	set_shortcut services com.mitchellh.ghostty.desktop -- _launch "Ctrl+Alt+T${tab}Meta+Return" "Ctrl+Alt+T"
+	set_shortcut services org.kde.konsole.desktop -- _launch "none" "Ctrl+Alt+T"
+	# Browser: Meta+B, which Plasma otherwise uses to switch power profiles
+	# (the Battery key still does that)
+	set_shortcut services chromium-browser.desktop -- _launch "Meta+B"
+	set_shortcut org_kde_powerdevil -- powerProfile \
+		"Battery,Battery${tab}Meta+B,Switch Power Profile" \
+		"Battery${tab}Meta+B,Battery${tab}Meta+B,Switch Power Profile"
+	# Search: Meta+Space, alongside KRunner's own Alt+Space and Alt+F2
+	set_shortcut services org.kde.krunner.desktop -- _launch "Alt+Space${tab}Alt+F2${tab}Search${tab}Meta+Space"
+	# Meta+E already opens the file manager (Dolphin's own default)
+	touch "${state}/shortcuts-0.2.0"
+fi
+
+# 0.2.0: Chromium starts on a new tab. Its first-run sequence shows an empty
+# "Additional Terms of Service" dialog (a placeholder in non-Google builds)
+# and opens Fedora's start page; marking the first run done skips both. Only
+# for accounts that haven't used Chromium yet.
+if [[ ! -e "${state}/chromium-first-run-0.2.0" ]]; then
+	if [[ ! -e "${config}/chromium" ]]; then
+		mkdir -p "${config}/chromium" && touch "${config}/chromium/First Run"
+	fi
+	touch "${state}/chromium-first-run-0.2.0"
+fi
+
+exit 0

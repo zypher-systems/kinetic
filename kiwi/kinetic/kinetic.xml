@@ -151,6 +151,7 @@
 		<ignore name="plasma-welcome-fedora"/>
 		<ignore name="fedora-release*"/>
 		<ignore name="fedora-logos*"/>
+		<ignore name="desktop-backgrounds-kde"/>
 
 		<!-- Replaced by RPM Fusion's full versions -->
 		<ignore name="ffmpeg-free"/>

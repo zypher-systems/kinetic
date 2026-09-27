@@ -5,7 +5,7 @@
 %global wallpaper_id ZypherOS-Kinetic
 
 Name:           kinetic-backgrounds
-Version:        0.1.0
+Version:        0.2.0
 Release:        1%{?dist}
 Summary:        ZypherOS Kinetic desktop wallpaper
 License:        LicenseRef-ZypherOS-Branding
@@ -17,9 +17,17 @@ Source1:        COPYING
 
 BuildRequires:  ImageMagick
 
+# Plasma's "Default" wallpaper, which Plasma Setup and new desktops fall back
+# to, comes from whichever package provides system-backgrounds-kde. This one
+# replaces Fedora's desktop-backgrounds-kde, as zypheros-logos replaces
+# fedora-logos.
+Provides:       system-backgrounds-kde = %{version}-%{release}
+Obsoletes:      desktop-backgrounds-kde < 45
+Conflicts:      desktop-backgrounds-kde
+
 %description
 The ZypherOS Kinetic wallpaper, packaged for KDE Plasma's wallpaper picker,
-lock screen, and login screen.
+lock screen, and login screen, and set as Plasma's default wallpaper.
 
 
 %prep
@@ -54,13 +62,18 @@ install -Dpm 0644 metadata.json ${dest}/metadata.json
 install -Dpm 0644 screenshot.jpg ${dest}/contents/screenshot.jpg
 install -d ${dest}/contents/images
 install -pm 0644 images/*.jpg ${dest}/contents/images/
+ln -s %{wallpaper_id} %{buildroot}%{_datadir}/wallpapers/Default
 
 
 %files
 %license COPYING
 %{_datadir}/wallpapers/%{wallpaper_id}/
+%{_datadir}/wallpapers/Default
 
 
 %changelog
+* Sun Sep 27 2026 Zypher Systems <zypher@zyphersystems.com> - 0.2.0-1
+- Make the Kinetic wallpaper Plasma's default, replacing desktop-backgrounds-kde
+
 * Sat Sep 26 2026 Zypher Systems <zypher@zyphersystems.com> - 0.1.0-1
 - Initial ZypherOS Kinetic wallpaper

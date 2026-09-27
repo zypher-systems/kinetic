@@ -5,5 +5,6 @@ LookAndFeelPackage=org.zypheros.kinetic.desktop
 
 [General]
 AccentColor=54,169,245
+fixed=JetBrains Mono,10,-1,5,50,0,0,0,0,0
 TerminalApplication=ghostty
 TerminalService=com.mitchellh.ghostty.desktop
