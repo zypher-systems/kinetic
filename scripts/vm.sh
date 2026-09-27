@@ -73,7 +73,10 @@ start() {
 	)
 	if ((boot_iso)); then
 		[[ -f "${iso}" ]] || { echo "No ISO at ${iso}; build it first" >&2; exit 1; }
-		args+=(-drive "file=${iso},media=cdrom,readonly=on" -boot order=d)
+		# bootindex, not -boot order: UEFI otherwise starts an installed
+		# system's saved boot entry first
+		args+=(-drive "file=${iso},media=cdrom,readonly=on,if=none,id=cd0"
+			-device ide-cd,drive=cd0,bootindex=0)
 	fi
 	if ((tpm)); then
 		# The TPM's state persists in out/vm/tpm, like the disk
