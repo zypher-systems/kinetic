@@ -1,0 +1,4 @@
+# ZypherOS Kinetic defaults
+# Docker starts on first use. Live installs keep the image's unit states, so
+# kinetic-snapshots-setup also enables this on first boot.
+enable docker.socket

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ZypherOS Kinetic image description.
+
+  Builds on Fedora's own kiwi descriptions, vendored unmodified in fedora/.
+  scripts/assemble-description.sh stages both into one kiwi description
+  directory, so the includes below resolve against Fedora's layout.
+-->
+<image schemaversion="7.4" name="ZypherOS-Kinetic">
+	<description type="system">
+		<author>Zypher Systems</author>
+		<contact>zypher@zyphersystems.com</contact>
+		<specification>ZypherOS Kinetic, based on Fedora Linux</specification>
+	</description>
+	<preferences>
+		<version>0.1.0</version>
+		<packagemanager>dnf5</packagemanager>
+		<locale>en_US</locale>
+		<keytable>us</keytable>
+		<timezone>UTC</timezone>
+		<release-version>44</release-version>
+	</preferences>
+	<include from="this://./repositories/core.xml"/>
+	<include from="this://./kinetic/repositories.xml"/>
+	<include from="this://./components/common.xml"/>
+	<include from="this://./components/boot.xml"/>
+	<include from="this://./components/desktops/common.xml"/>
+	<include from="this://./components/desktops/kde.xml"/>
+	<include from="this://./components/liveinstall.xml"/>
+	<include from="this://./components/users.xml"/>
+	<include from="this://./kinetic/kinetic.xml"/>
+	<packages type="bootstrap">
+		<package name="filesystem"/>
+	</packages>
+</image>

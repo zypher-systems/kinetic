@@ -1,0 +1,46 @@
+#!/usr/bin/bash
+# Install ZypherOS Kinetic's standard GUI apps on the first boot: Cursor and
+# Grok Bot from their vendors' repositories, Flatseal and Gear Lever from
+# Flathub. Runs on the first boot of an installed system. Kinetic doesn't
+# redistribute them in its ISO, so they are always current. The systemd unit
+# retries until this succeeds, e.g. after an offline install.
+set -euo pipefail
+
+stamp=/var/lib/kinetic/firstboot-apps.done
+repos=/etc/yum.repos.d
+
+# The vendors' repository definitions, as their install instructions create
+# them. grok-bot rewrites its own file on every update.
+if [[ ! -e "${repos}/cursor.repo" ]]; then
+	cat > "${repos}/cursor.repo" <<'REPO'
+[cursor]
+name=Cursor
+baseurl=https://downloads.cursor.com/yumrepo
+enabled=1
+gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-anysphere
+repo_gpgcheck=1
+REPO
+fi
+if [[ ! -e "${repos}/grok-bot.repo" ]]; then
+	cat > "${repos}/grok-bot.repo" <<'REPO'
+[grok-bot]
+name=Grok Bot
+baseurl=https://downloads.cursor.com/yumrepo/grok-bot
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-anysphere
+skip_if_unavailable=1
+REPO
+fi
+
+dnf -y install cursor grok-bot
+
+# Flatpak helpers from Flathub (fedora-flathub-remote configures the remote)
+flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+flatpak install -y --noninteractive flathub com.github.tchx84.Flatseal it.mijorus.gearlever
+
+install -d /var/lib/kinetic
+touch "${stamp}"
+echo "Cursor, Grok Bot, Flatseal, and Gear Lever are installed."

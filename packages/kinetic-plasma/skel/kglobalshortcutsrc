@@ -1,0 +1,5 @@
+[services][org.kde.konsole.desktop]
+_launch=none
+
+[services][com.mitchellh.ghostty.desktop]
+_launch=Ctrl+Alt+T

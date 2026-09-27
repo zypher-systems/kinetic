@@ -1,0 +1,12 @@
+# Rootless helper image: checks the kiwi description and resolves its package
+# list without building, and builds Kinetic's RPMs. ISO builds run on the
+# host (build-iso.sh).
+FROM registry.fedoraproject.org/fedora:44
+
+RUN dnf -y upgrade && dnf -y install \
+        kiwi-cli distribution-gpg-keys python3 python3-solv libsolv-tools \
+        rpm-build rpm-sign systemd-rpm-macros createrepo_c dnf5-plugins rpmlint gnupg2 \
+        librsvg2-tools ImageMagick && \
+    dnf clean all
+
+WORKDIR /work

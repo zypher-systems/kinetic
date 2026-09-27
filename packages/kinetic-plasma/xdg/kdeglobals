@@ -1,0 +1,9 @@
+# ZypherOS Kinetic defaults. Takes precedence over Fedora's KDE profile;
+# your own settings in ~/.config/kdeglobals take precedence over these.
+[KDE]
+LookAndFeelPackage=org.zypheros.kinetic.desktop
+
+[General]
+AccentColor=54,169,245
+TerminalApplication=ghostty
+TerminalService=com.mitchellh.ghostty.desktop

@@ -2,6 +2,37 @@
 
 Record of what has been decided for ZypherOS Kinetic, why, and what is still open. Last updated 2026-09-25.
 
+## Build 1 (0.1.0): locked
+
+The first ISO: a bootable live image with an installer, tested in a VM first and then on the reference AMD machine.
+
+| Area | Ships in build 1 |
+| --- | --- |
+| Base | Fedora Linux 44, KDE Plasma, mutable, Anaconda "Install to Hard Drive" |
+| Identity | ZypherOS Kinetic 0.1.0 in `os-release`; circuit-Z logo (recreated as SVG) on boot splash, login screen, app launcher, installer, fastfetch; wallpaper *Zypher Systems 4K-2* on desktop, lock screen, login screen; Breeze Dark with a Zypher-blue accent |
+| Shell and terminal | fish (default for new users) + starship; Ghostty as default terminal, Konsole kept as fallback; the reference machine's fish, Ghostty, and fastfetch configs with fixes applied |
+| Browser | Chromium |
+| CLI agents | Claude Code (stable channel), OpenCode, Grok Build, Codex, Gemini CLI, Copilot CLI: each installs from its official source the first time it is run (see [Agent installation](#agent-installation)) |
+| Editors and desktop agents | VSCodium in the ISO; Grok Bot and Cursor installed at first boot from their vendors' repositories; Microsoft's VS Code repository included but disabled |
+| Containers and VMs | Docker CE (buildx, compose plugin), Podman, distrobox; qemu-kvm, libvirt, swtpm, UEFI firmware, virt-manager |
+| Dev tools | git, gh, glab, just, gcc/clang/cmake/ninja/make, Node.js, Python + uv, Go, Rust via rustup, Tauri build libraries (WebKitGTK 4.1, GTK3, libappindicator, librsvg, OpenSSL) |
+| CLI tools | starship, zoxide, fzf, eza, bat, ripgrep, fd, btop, fastfetch, tmux, neovim |
+| Desktop apps | KDE core (Dolphin, Kate, Okular, Gwenview, Spectacle, Ark, Filelight, KDE Connect, Partition Manager, Discover), LibreOffice, GIMP, Inkscape, Blender, OBS Studio; Flatseal and Gear Lever from Flathub |
+| Networking | Tailscale and Syncthing, installed but off until enabled |
+| Codecs and hardware | RPM Fusion free and nonfree, full ffmpeg, `mesa-va-drivers-freeworld` for H.264/H.265 hardware video, fwupd; open AMD/Intel drivers with Secure Boot on |
+| Snapshots | snapper snapshots before and after every dnf transaction (dnf5 actions plugin); Docker, Podman, and libvirt storage on their own btrfs subvolumes so OS rollbacks never touch them; btrfs-assistant for browsing and restoring snapshots |
+| Removed | KDE PIM and Akonadi, ABRT, Fedora's welcome tour, KDE games |
+| Build tooling | kiwi, starting from Fedora's own kiwi descriptions, plus Kinetic RPMs for branding, defaults, and launchers |
+
+## Later builds
+
+- **System agent**, including the separate Chromium profile agents drive. Its design is decided after build 1 ships.
+- **NVIDIA edition**
+- **Booting into snapshots** from the boot menu
+- **Local AI**
+- **Welcome app**
+- **Hosted package repository, signing, and CI** so installed systems receive Kinetic updates
+
 ## Decided
 
 ### Base: Fedora Linux 44, KDE Plasma
@@ -33,33 +64,59 @@ Kinetic is aimed at Docker and native desktop-app development, where builds need
 
 ### Containers and virtual machines
 
-- **Docker CE** from Docker's own repository, with buildx and the compose plugin
-- **Podman**, alongside Docker; no `podman-docker` shim, since it conflicts with Docker's `docker` command
-- **distrobox**, for keeping project toolchains separate from the host
-- **KVM:** qemu-kvm, libvirt, swtpm, and UEFI firmware, with **virt-manager** as the GUI. KDE's Karton is in Fedora 44 as a 0.1 preview; revisit later.
+Docker CE comes from Docker's own repository. Podman ships alongside it without the `podman-docker` shim, which conflicts with Docker's `docker` command. distrobox keeps project toolchains separate from the host. KVM uses virt-manager as its GUI; KDE's Karton is in Fedora 44 as a 0.1 preview, to revisit later.
 
 ### Shell, terminal, browser
 
-- **fish** with **starship** as the default shell
-- **Ghostty** as the default terminal
-- **Chromium** as the default browser. Agents drive their own separate Chromium profile and never touch the user's.
+fish with starship, Ghostty, and Chromium. Agents drive their own separate Chromium profile and never touch the user's.
+
+### Packages and updates
+
+Kinetic's own packages (identity, branding, defaults, agent launchers) live in `packages/` in this repository. They are built in a rootless Fedora 44 container, signed with a Zypher Systems key, and published by GitHub Actions to GitHub Pages at `zypher-systems.github.io/kinetic` whenever `main` changes. Installed systems update from there alongside Fedora. Fedora Copr was the alternative; it would have required relicensing the artwork, and packages would be signed with Copr's key rather than ours.
+
+### Identity and branding
+
+- `zypheros-release` replaces Fedora's release packages, following Fedora's own `generic-release` template for remixes. `os-release` says `NAME="ZypherOS"`, `ID=zypheros`, `ID_LIKE=fedora`, `PRETTY_NAME="ZypherOS Kinetic 0.1.0"`. `VERSION_ID` stays `44`, because dnf, RPM Fusion, and third-party installers use it to pick packages.
+- `zypheros-logos` replaces `fedora-logos` under the same file and icon names, as Fedora's `generic-logos` does, so the installer, boot splash, Plasma launcher, and About page show ZypherOS artwork without patching anything.
+- The logo is the circuit-Z mark, recreated as SVG for build 1, with a simplified version for sizes of 32 px and below. The wordmark reads ZYPHER**OS** / KINETIC in Montserrat. Sources are in `branding/`; the artwork is all rights reserved.
+
+### Native desktop apps
+
+Tauri is the planned stack (Rust with a web UI), so Rust and Tauri's build libraries ship on the host.
+
+### Agent installation
+
+Kinetic never redistributes proprietary agent binaries in its ISO. Everything installs from its official source, so each agent is current on day one.
+
+**CLI agents install on first launch.** Every CLI agent ships as a small launcher. The first time it runs, it installs the agent with the vendor's official per-user installer, then hands over to it. From then on the agent updates itself, with no sudo needed. This works in the live USB session too. The first run needs internet.
+
+| CLI agent | Official installer | Installs into |
+| --- | --- | --- |
+| Claude Code | `claude.ai/install.sh`, `stable` channel | `~/.local/share/claude` |
+| OpenCode | `opencode.ai/install` (MIT) | `~/.opencode` |
+| Grok Build | `x.ai/cli/install.sh` (source Apache-2.0) | `~/.grok` |
+| Codex, Gemini CLI, Copilot CLI | Each vendor's official package | User's home directory |
+
+**GUI apps install at first boot.** A first-boot service installs them from their vendors' signed dnf repositories and retries when the network comes up, so a machine installed offline catches up once connected. They update with `dnf upgrade`.
+
+| App | Repository |
+| --- | --- |
+| Grok Bot | Anysphere's `grok-bot` repository (`downloads.cursor.com/yumrepo/grok-bot`) |
+| Cursor | Anysphere's repository (`downloads.cursor.com/yumrepo`) |
+
+### Editor: VSCodium by default
+
+VSCodium is the MIT-licensed build of VS Code without Microsoft's telemetry or branding. Because it is open source it ships inside the ISO, from the VSCodium RPM repository. Its extensions come from Open VSX, which has the Claude Code, rust-analyzer, Tauri, Docker, Python, and clangd extensions. Microsoft keeps some extensions to its own VS Code: Dev Containers, Remote-SSH, Pylance, the C/C++ tools, and GitHub Copilot. For those, Microsoft's VS Code repository ships disabled, one command away. VSCodium also trails VS Code by a few releases.
 
 ## Proposed, not yet confirmed
 
-- **Agent harnesses.** Claude Code, OpenCode, Grok, Codex, Gemini CLI, and Copilot CLI ship as launchers that install from the official source on first run. Cursor and VS Code come from their vendors' RPM repositories.
-- **System agent.** A harness-agnostic MCP server exposing system tools (status, logs, updates and rollback, apps, services, network, displays, Plasma settings), plus an instructions file that teaches any harness how Kinetic works. The user picks their default agent at first boot. Failed services and crashed apps get a "diagnose with agent" action.
-- **Snapshots.** snapper takes a snapshot before and after every dnf transaction, via dnf5's actions plugin. Docker, Podman, and libvirt storage live on separate btrfs subvolumes so an OS rollback never touches them.
-- **Removed for speed.** KDE PIM and Akonadi, KDE games, ABRT (replaced by agent crash diagnosis), Fedora's welcome tour, and Baloo file-content indexing.
-- **Build tooling.** Fedora's own kiwi descriptions plus a Kinetic RPM repository, rather than livemedia-creator.
+- **System agent.** To be designed after build 1 ships. The starting proposal: a harness-agnostic MCP server exposing system tools (status, logs, updates and rollback, apps, services, network, displays, Plasma settings), plus an instructions file that teaches any harness how Kinetic works. The user picks their default agent at first boot. Failed services and crashed apps get a "diagnose with agent" action.
 
 ## Open questions
 
-- Which stack native desktop apps are built with (Tauri, Electron, Qt, Flutter), which decides the thick-app dev bundle
-- Office and creative apps (LibreOffice, GIMP, Inkscape, Blender, OBS): default install or an optional extras bundle
-- Local AI: include by default, and which runtime (Fedora's Ollama is 0.12; upstream Ollama or RamaLama are alternatives)
-- Tailscale and Syncthing
-- Wallpapers: one default or a Zypher Systems pack
-- Booting into a snapshot from the boot menu, which Fedora does not provide out of the box (grub-btrfs is not packaged)
+- Where ISOs are published: at 3.3 GB they exceed GitHub's 2 GB limit per release file
+- How to boot into snapshots on Fedora (grub-btrfs is not packaged)
+- Local AI runtime, when it is added (Fedora's Ollama is 0.12; upstream Ollama or RamaLama are alternatives)
 
 ## Hardware notes
 

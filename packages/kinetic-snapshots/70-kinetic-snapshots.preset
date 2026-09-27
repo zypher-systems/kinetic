@@ -1,0 +1,3 @@
+# ZypherOS Kinetic: btrfs snapshots
+enable kinetic-snapshots-setup.service
+enable snapper-cleanup.timer

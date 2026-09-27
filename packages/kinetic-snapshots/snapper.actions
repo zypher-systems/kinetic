@@ -1,0 +1,11 @@
+# ZypherOS Kinetic: snapper snapshots before and after every dnf transaction.
+# From the libdnf5-actions(8) manual, which emulates the DNF4 snapper plugin.
+
+# Saves the command line that started the transaction as the description
+pre_transaction::::/usr/bin/sh -c echo\ "tmp.snapper_descr=$(ps\ -o\ command\ --no-headers\ -p\ '${pid}')"
+
+# Creates the pre snapshot and remembers its number
+pre_transaction::::/usr/bin/sh -c echo\ "tmp.snapper_pre_number=$(snapper\ create\ -t\ pre\ -p\ -d\ '${tmp.snapper_descr}')"
+
+# Creates the matching post snapshot, then clears the variables
+post_transaction::::/usr/bin/sh -c [\ -n\ "${tmp.snapper_pre_number}"\ ]\ &&\ snapper\ create\ -t\ post\ --pre-number\ "${tmp.snapper_pre_number}"\ -d\ "${tmp.snapper_descr}"\ ;\ echo\ tmp.snapper_pre_number\ ;\ echo\ tmp.snapper_descr
