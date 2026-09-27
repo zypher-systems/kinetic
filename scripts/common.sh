@@ -2,7 +2,7 @@
 
 KINETIC_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-KINETIC_VERSION="0.1.0"
+KINETIC_VERSION="0.2.0"
 KINETIC_ARCH="x86_64"
 KINETIC_PROFILE="Kinetic-KDE-Desktop-Live"
 

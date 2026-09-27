@@ -14,7 +14,7 @@
 		<specification>ZypherOS Kinetic, based on Fedora Linux</specification>
 	</description>
 	<preferences>
-		<version>0.1.0</version>
+		<version>0.2.0</version>
 		<packagemanager>dnf5</packagemanager>
 		<locale>en_US</locale>
 		<keytable>us</keytable>
