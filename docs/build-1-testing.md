@@ -19,7 +19,7 @@ Found and fixed for the next build:
 | Problem | Cause | Fix |
 | --- | --- | --- |
 | Installed system boots to a GRUB menu with no ZypherOS entry | `grub2-mkconfig` recorded `blsdir` as the btrfs build host's path of the image root | `kiwi/config.sh` unsets `blsdir`; an Anaconda post-script in `zypheros-release` does too |
-| `docker` has no socket | systemd applies presets on first boot, undoing `systemctl enable` from the image build | `70-zypheros-kinetic.preset` in `zypheros-release` enables `docker.socket` |
+| `docker` has no socket | Thought to be systemd reapplying presets on first boot; the second install showed the real cause (below) | `70-zypheros-kinetic.preset` in `zypheros-release`; not enough on its own, see below |
 | Ctrl+Alt+T opens Konsole | Konsole and Ghostty both claim it; KDE's shortcut service only reads per-user config | New users get `~/.config/kglobalshortcutsrc` from `/etc/skel` (verified in the VM) |
 | `/var/lib/containers` not a subvolume | It already contains files from containers-common | Subvolume at `/var/lib/containers/storage` instead |
 | fish prints "mkdir: created directory" | Aliases are functions in fish, so `mkdir -pv` also applied inside fish itself | Aliases became abbreviations |
