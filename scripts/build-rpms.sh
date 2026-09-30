@@ -27,7 +27,9 @@ else
 	mapfile -t packages < <(find packages -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort)
 fi
 
-command -v createrepo_c >/dev/null || { echo "createrepo_c is required: sudo dnf install createrepo_c" >&2; exit 1; }
+if ! ((use_container)); then
+	command -v createrepo_c >/dev/null || { echo "createrepo_c is required: sudo dnf install createrepo_c" >&2; exit 1; }
+fi
 
 # Stage each package: its spec, its own files, and the shared branding sources
 rm -rf "${work}"
@@ -64,7 +66,11 @@ fi
 
 mkdir -p "${KINETIC_REPO_DIR}"
 find "${work}" -path '*/RPMS/*' -name '*.rpm' -exec cp -p {} "${KINETIC_REPO_DIR}/" \;
-createrepo_c --quiet --update "${KINETIC_REPO_DIR}"
+if ((use_container)); then
+	podman run --rm --volume "${KINETIC_REPO_DIR}:/repo:Z" "${image}" createrepo_c --quiet --update /repo
+else
+	createrepo_c --quiet --update "${KINETIC_REPO_DIR}"
+fi
 
 echo "Repository: ${KINETIC_REPO_DIR}"
 find "${KINETIC_REPO_DIR}" -maxdepth 1 -name '*.rpm' -printf '  %f\n' | sort
