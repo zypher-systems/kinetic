@@ -10,7 +10,7 @@ Kinetic is the desktop edition of **ZypherOS**, an agentic Linux distribution fr
 - **Agents are part of the OS.** Claude Code, OpenCode, Grok Build, Codex, Gemini CLI, and Copilot CLI are ready to run and install from their official sources on first launch. VSCodium, Cursor, and Grok Bot come as standard. A system agent that helps manage the machine is planned after the first release.
 - **A developer workstation out of the box.** Docker, Podman, distrobox, KVM with virt-manager, fish + starship, Ghostty, and Chromium.
 
-See [docs/decisions.md](docs/decisions.md) for what has been decided so far and why, [docs/security.md](docs/security.md) for what Kinetic does to keep a machine safe by default, and [docs/recovery.md](docs/recovery.md) for undoing updates and recovering a machine that won't start.
+See [docs/roadmap.md](docs/roadmap.md) for where Kinetic is headed and what 1.0 means, [docs/decisions.md](docs/decisions.md) for what has been decided so far and why, [docs/security.md](docs/security.md) for what Kinetic does to keep a machine safe by default, and [docs/recovery.md](docs/recovery.md) for undoing updates and recovering a machine that won't start.
 
 ## Building
 
@@ -38,6 +38,7 @@ Kinetic's own packages are published by the [Packages workflow](.github/workflow
 | `branding/` | Source artwork (all rights reserved; see `branding/COPYING`) |
 | `scripts/` | Build, check, signing-key, and VM test scripts |
 | `containers/builder/` | Rootless container used by `check-description.sh` |
+| `docs/roadmap.md` | Releases, and what 1.0 means |
 | `docs/decisions.md` | Decisions made so far, alternatives considered, open questions |
 | `docs/security.md`, `docs/recovery.md` | Security defaults; undoing updates and recovery |
 | `import/devbox/` | Raw configs and wallpaper from the reference dev machine, source material for Kinetic's defaults |
