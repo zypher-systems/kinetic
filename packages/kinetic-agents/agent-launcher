@@ -14,7 +14,7 @@ case "${name}" in
 		title="Claude Code"; bin="${HOME}/.local/bin/claude"; source_url="https://claude.ai/install.sh"
 		install_agent() { curl -fsSL "${source_url}" | bash -s stable; } ;;
 	opencode)
-		title="OpenCode"; bin="${HOME}/.opencode/bin/opencode"; source_url="https://opencode.ai/install"
+		title="OpenCode"; bin="${HOME}/.opencode/bin/opencode"; source_url="https://opencode.ai/v2/install"
 		install_agent() { curl -fsSL "${source_url}" | bash; } ;;
 	grok)
 		title="Grok Build"; bin="${HOME}/.grok/bin/grok"; source_url="https://x.ai/cli/install.sh"
@@ -33,6 +33,12 @@ case "${name}" in
 		exit 2 ;;
 esac
 
+if [[ ! -x "${bin}" && -n "${KINETIC_AGENT_INSTALLING:-}" ]]; then
+	# Run by a vendor installer checking for an existing install: there is
+	# none yet, and waiting for the lock below would deadlock
+	exit 127
+fi
+
 if [[ ! -x "${bin}" ]]; then
 	# Serialize first runs, e.g. two terminals opened at once
 	lockdir="${XDG_RUNTIME_DIR:-/tmp}/kinetic-agents"
@@ -41,7 +47,11 @@ if [[ ! -x "${bin}" ]]; then
 	flock 9
 	if [[ ! -x "${bin}" ]]; then
 		echo "Installing ${title} for $(id -un) from ${source_url} (first run)..." >&2
-		if ! install_agent >&2; then
+		# Installers may look for an existing install with `command -v`; keep
+		# these launchers out of their PATH so they don't find one
+		self_dir="$(cd "$(dirname "$0")" && pwd)"
+		installer_path="$(tr ':' '\n' <<<"${PATH}" | { grep -vxF -e "${self_dir}" -e "${self_dir}/" || true; } | paste -sd:)"
+		if ! (export PATH="${installer_path}" KINETIC_AGENT_INSTALLING=1; install_agent) >&2; then
 			echo "Could not install ${title}. Check your internet connection and run '${name}' again." >&2
 			exit 1
 		fi

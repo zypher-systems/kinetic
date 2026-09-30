@@ -107,7 +107,7 @@ Kinetic never redistributes proprietary agent binaries in its ISO. Everything in
 | CLI agent | Official installer | Installs into |
 | --- | --- | --- |
 | Claude Code | `claude.ai/install.sh`, `stable` channel | `~/.local/share/claude` |
-| OpenCode | `opencode.ai/install` (MIT) | `~/.opencode` |
+| OpenCode | `opencode.ai/v2/install` (MIT) | `~/.opencode` |
 | Grok Build | `x.ai/cli/install.sh` (source Apache-2.0) | `~/.grok` |
 | Codex, Gemini CLI, Copilot CLI | Each vendor's official package | User's home directory |
 

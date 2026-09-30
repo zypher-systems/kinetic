@@ -5,7 +5,7 @@
 # never redistributes the agents themselves.
 
 Name:           kinetic-agents
-Version:        0.1.0
+Version:        0.2.0
 Release:        1%{?dist}
 Summary:        Coding agents for ZypherOS Kinetic
 License:        MIT
@@ -87,5 +87,8 @@ install -d %{buildroot}%{_sharedstatedir}/kinetic
 
 
 %changelog
+* Wed Sep 30 2026 Zypher Systems <zypher@zyphersystems.com> - 0.2.0-1
+- Install OpenCode from its v2 installer (opencode.ai/v2/install)
+
 * Sat Sep 26 2026 Zypher Systems <zypher@zyphersystems.com> - 0.1.0-1
 - Initial agent launchers and first-boot install of Cursor and Grok Bot
