@@ -7,7 +7,7 @@ Where ZypherOS Kinetic is headed. What has been decided, and why, is in [decisio
 | Release | Status |
 | --- | --- |
 | 0.1.0 | First ISO: base, branding, configs, agent launchers. Installed and tested in a VM ([test log](build-1-testing.md)) |
-| 0.2.0 "Daily driver" | Security defaults, proven updates and rollback, polish. In testing on real hardware ([test log](0.2.0-testing.md)) |
+| 0.2.0 "Daily driver" | Security defaults, proven updates and rollback, polish. The current release, running on the reference desktop and laptop ([test log](0.2.0-testing.md)) |
 
 Later, in no fixed order: the system agent (Reeve), an NVIDIA edition, local AI, and a welcome app ([decisions](decisions.md#later-builds)).
 
