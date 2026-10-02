@@ -12,7 +12,7 @@
 
 Name:           kinetic-repos
 Version:        0.1.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Package repositories for ZypherOS Kinetic
 License:        MIT
 URL:            https://github.com/zypher-systems/kinetic
@@ -69,6 +69,9 @@ install -pm 0644 %{_sourcedir}/keys/RPM-GPG-KEY-* ${keys}/
 
 
 %changelog
+* Fri Oct 02 2026 Zypher Systems <zypher@zyphersystems.com> - 0.1.0-2
+- Check the Kinetic repository for updates every hour instead of every six
+
 * Sat Sep 26 2026 Zypher Systems <zypher@zyphersystems.com> - 0.1.0-1
 - Initial repositories: Kinetic, Docker CE, VSCodium, VS Code (disabled),
   Ghostty and starship Copr

@@ -9,7 +9,7 @@
 
 Name:           kinetic-plasma
 Version:        0.2.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        ZypherOS Kinetic KDE Plasma defaults
 # The Global Theme is derived from plasma-workspace (GPL-2.0-or-later);
 # the splash logo and previews are ZypherOS artwork
@@ -108,6 +108,10 @@ install -Dpm 0644 %{_sourcedir}/plasmalogin/50-kinetic.conf \
 
 
 %changelog
+* Fri Oct 02 2026 Zypher Systems <zypher@zyphersystems.com> - 0.2.0-2
+- No KDE Wallet in the live session, so unlocking a disk there doesn't start
+  its first-run wizard
+
 * Sun Sep 27 2026 Zypher Systems <zypher@zyphersystems.com> - 0.2.0-1
 - JetBrains Mono as the monospace font, in KDE and non-KDE apps
 - Shortcuts: Meta+Return for Ghostty, Meta+B for the browser, Meta+Space for

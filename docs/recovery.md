@@ -53,7 +53,7 @@ dnf keeps the three most recent kernels, and the boot menu can start any of them
 
 Boot the ZypherOS Kinetic USB stick (choose it in the firmware's boot menu, usually F12 on Lenovo), close the Welcome Center, and:
 
-1. **If the disk is encrypted,** open **Dolphin** and click the **Encrypted Drive** under *Devices*. If KDE Wallet offers to create a wallet, choose **Cancel**. Enter the disk passphrase or the recovery key (the TPM and its PIN only work when booting the installed system).
+1. **If the disk is encrypted,** open **Dolphin** and click the **Encrypted Drive** under *Devices*. Enter the disk passphrase or the recovery key (the TPM and its PIN only work when booting the installed system).
 2. Open **Btrfs Assistant**. The installed system's filesystem is selected at the top.
 3. Go to **Snapper → Browse/Restore** (the *New/Delete* view stays empty in the live session). Pick the snapshot to go back to, for example the **pre** snapshot of the last update, click **Restore**, and confirm.
 4. Shut down, remove the USB stick, and start the computer. If the restore went back past a kernel update, expect the one extra restart from the boot menu repair.

@@ -12,6 +12,14 @@ mkdir -p "${dest}"
 
 cp -a "${KINETIC_ROOT}/kiwi/fedora/." "${dest}/"
 
+# Fedora's ISO boot menu defaults to its second entry, which checks the whole
+# medium before starting: a minute or more for an image this size. Kinetic
+# starts directly; the check stays in the menu. Done on the staged copy, so
+# the vendored description stays as Fedora ships it.
+grub_template="${dest}/grub-x86.cfg.iso-template"
+sed -i 's/^set default="1"$/set default="0"/' "${grub_template}"
+grep -q '^set default="0"$' "${grub_template}" || { echo "Could not set the ISO boot menu default in ${grub_template}" >&2; exit 1; }
+
 # Kinetic's config.sh replaces Fedora's and calls it from inside the image
 install -D -m 0755 "${KINETIC_ROOT}/kiwi/fedora/config.sh" "${dest}/root/kinetic-build/fedora-config.sh"
 install -m 0755 "${KINETIC_ROOT}/kiwi/config.sh" "${dest}/config.sh"

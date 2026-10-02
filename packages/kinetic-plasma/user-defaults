@@ -35,6 +35,13 @@ set_shortcut() {
 	done
 }
 
+# Live session: no KDE Wallet. Unlocking a disk in Dolphin, as when rescuing an
+# installed system, would otherwise open KWallet's "create a wallet" wizard
+# first. Nothing in a live session outlives it anyway.
+if grep -qw rd.live.image /proc/cmdline; then
+	kwriteconfig6 --file "${config}/kwalletrc" --group Wallet --key Enabled false
+fi
+
 # 0.2.0: keyboard shortcuts
 if [[ ! -e "${state}/shortcuts-0.2.0" ]]; then
 	# Ghostty: Ctrl+Alt+T and Meta+Return. Konsole gives up Ctrl+Alt+T.
