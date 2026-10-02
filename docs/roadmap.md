@@ -17,9 +17,11 @@ Kinetic starts as Fedora with Zypher Systems' defaults on top. Over time, Zypher
 
 ## In dev since 0.2.0
 
+Checked in the VM on an ISO built from this work on 2026-10-02: boot menu, live session, and a fresh install.
+
 - The ISO's boot menu starts ZypherOS by default; Fedora's default was the entry that checks the whole medium first, which stays in the menu
 - Plasma Setup shows its welcome text over a blurred, darkened Kinetic wallpaper instead of on top of the wordmark
-- No KDE Wallet wizard in the live session when unlocking a disk (checked in the 0.2.0 live session with the same setting)
+- No KDE Wallet wizard in the live session when unlocking a disk
 - Installed systems check the Kinetic repository for updates every hour, not every six
 - `build-rpms.sh` no longer needs `createrepo_c` on the host
 
